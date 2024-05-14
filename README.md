@@ -8,6 +8,9 @@
 "username":"remote",  
 "password":"790513*Remote"  
 }  
-
-
-函数名用首字母小写的驼峰!  
+服务器
+{
+"ip":"49.232.224.58",
+"username":"lighthouse",
+"password":"790513csd"
+} 
