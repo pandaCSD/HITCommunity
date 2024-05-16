@@ -12,4 +12,5 @@ public interface UserDao extends JpaRepository<User, Integer> {
     Boolean deleteByUname(String username);
     Boolean deleteByUid(Integer uid);
     //创建用户
+    //
 }
