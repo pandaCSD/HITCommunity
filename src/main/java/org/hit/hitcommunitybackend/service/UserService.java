@@ -1,4 +1,4 @@
 package org.hit.hitcommunitybackend.service;
 
-public class UserService {
+public interface UserService {
 }
