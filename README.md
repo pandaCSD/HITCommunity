@@ -15,5 +15,32 @@
 "password":"790513csd"  
 }   
 
-
-https://code-with-me.jetbrains.com.cn/hurwDrhfoSufyFuY_-6Hww#p=IU&fp=18E858EBC96AE96A872F4A4CFD9C57F523B9FD65534845DAC04A0C4E2D6D8A78&newUi=true
+数据库表定义
+- users 存储用户信息
+  - uid:用户id
+  - uname:用户名
+  - upassword:用户密码
+- posts 存储帖子信息
+  - pid:帖子id
+  - ptime:帖子发布时间
+  - powner:帖子发布者
+- reposts 存储转发信息
+  - rid: 转发id
+  - original_pid: 原始帖子id
+  - rtime: 转发时间
+  - rowner: 转发者
+- comments 存储评论信息
+  - cid: 评论id
+  - pid: 被评论的帖子id
+  - uid: 评论者id
+  - ctime: 评论时间
+  - ccontent: 评论内容
+- likes 存储点赞信息
+  - lid: 点赞id
+  - pid: 被点赞的帖子id
+  - uid: 点赞者id
+  - ltime: 点赞时间
+- images 存储图片信息
+  - iid: 图片id
+  - pid: 帖子id
+  - iurl: 图片路径
