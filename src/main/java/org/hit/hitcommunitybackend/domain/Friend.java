@@ -1,15 +1,13 @@
 package org.hit.hitcommunitybackend.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "friends")
+@IdClass(FriendId.class)
 public class Friend {
 
     @Id
@@ -83,5 +81,22 @@ public class Friend {
                 ", since=" + since +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Friend friend = (Friend) o;
+        return Objects.equals(uid1, friend.uid1) &&
+                Objects.equals(uid2, friend.uid2) &&
+                status == friend.status &&
+                Objects.equals(since, friend.since);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uid1, uid2, status, since);
+    }
+
 }
 
