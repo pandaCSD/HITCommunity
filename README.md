@@ -44,3 +44,8 @@
   - iid: 图片id
   - pid: 帖子id
   - iurl: 图片路径
+- friends 存储好友关系
+  - uid1: 用户1的id
+  - uid2: 用户2的id
+  - status: 关系状态（例如：待确认、已确认、已删除等）
+  - since: 关系建立时间
