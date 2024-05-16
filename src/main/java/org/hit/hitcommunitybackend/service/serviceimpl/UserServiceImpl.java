@@ -16,17 +16,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User userRegisterService(String uname, String upassword) {
-        return null;
+        if(userDao.findByUname(uname) != null) {
+            return null;
+        }
+        User user = new User();
+        user.setUname(uname);
+        user.setUpassword(upassword);
+        return userDao.save(user);
     }
 
     @Override
     public User userLoginService(String uname, String upassword) {
-        return null;
+        return userDao.findByUnameAndUpassword(uname, upassword);
     }
 
     @Override
     public User userUpdateUnameService(Integer uid, String uname) {
-        return null;
+        User user = userDao.findByUid(uid);
+        user.setUname(uname);
+        return userDao.save(user);
     }
 
     @Override
