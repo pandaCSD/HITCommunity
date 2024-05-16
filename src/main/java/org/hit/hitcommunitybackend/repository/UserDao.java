@@ -2,6 +2,7 @@ package org.hit.hitcommunitybackend.repository;
 
 import org.hit.hitcommunitybackend.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -11,6 +12,5 @@ public interface UserDao extends JpaRepository<User, Integer> {
     User findByUnameAndUpassword(String username, String password);
     Boolean deleteByUname(String username);
     Boolean deleteByUid(Integer uid);
-    //创建用户
-    //
+    User saveUser(User user);
 }
