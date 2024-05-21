@@ -12,8 +12,13 @@ public class FriendId implements Serializable {
 
     // Constructor with parameters
     public FriendId(Integer uid1, Integer uid2) {
-        this.uid1 = uid1;
-        this.uid2 = uid2;
+        if(uid1 < uid2) {
+            this.uid1 = uid1;
+            this.uid2 = uid2;
+        } else {
+            this.uid1 = uid2;
+            this.uid2 = uid1;
+        }
     }
 
     // Getters and setters

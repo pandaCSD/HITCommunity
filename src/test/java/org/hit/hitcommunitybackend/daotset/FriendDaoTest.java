@@ -4,7 +4,6 @@ import org.hit.hitcommunitybackend.domain.Friend;
 import org.hit.hitcommunitybackend.domain.FriendId;
 import org.hit.hitcommunitybackend.domain.User;
 import org.hit.hitcommunitybackend.repository.FriendDao;
-import org.hit.hitcommunitybackend.domain.FriendshipStatus;
 import org.hit.hitcommunitybackend.repository.UserDao;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,7 @@ class FriendDaoTest {
     @Test
     void testSaveAndFindById() {
         // 创建一个新的朋友关系
-        Friend friend = new Friend(1, 2, FriendshipStatus.PENDING_CONFIRMATION);
+        Friend friend = new Friend(1, 2);
 
         // 保存朋友关系
         Friend savedFriend = friendDao.save(friend);
@@ -59,7 +58,7 @@ class FriendDaoTest {
         userDao.save(user3);
 
         // 创建一个新的朋友关系
-        Friend friend = new Friend(1, 2, FriendshipStatus.PENDING_CONFIRMATION);
+        Friend friend = new Friend(1, 2);
 
         // 保存朋友关系
         friendDao.save(friend);

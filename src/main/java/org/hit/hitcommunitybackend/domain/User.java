@@ -21,6 +21,15 @@ public class User {
     @Column(name = "upassword", nullable = false)
     private String upassword;
 
+    public User(String uname, String upassword) {
+        this.uname = uname;
+        this.upassword = upassword;
+    }
+
+    public User() {
+
+    }
+
     // Getters and Setters
 
     public Integer getUid() {

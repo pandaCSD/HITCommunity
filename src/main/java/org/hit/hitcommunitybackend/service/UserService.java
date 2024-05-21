@@ -1,6 +1,5 @@
 package org.hit.hitcommunitybackend.service;
 
-import org.hit.hitcommunitybackend.domain.FriendshipStatus;
 import org.hit.hitcommunitybackend.domain.User;
 
 import java.util.List;
@@ -12,9 +11,9 @@ public interface UserService {
     User userUpdateUpasswordService(Integer uid, String upassword);
     boolean userDeleteService(Integer uid);
     boolean userDeleteFriendService(Integer uid1, Integer uid2);
-    boolean friendRequestSentService(Integer uid1, Integer uid2);
-    boolean friendRequestAccepteService(Integer uid1, Integer uid2);
-    boolean friendRequestRejecteService(Integer uid1, Integer uid2);
+    boolean friendRequestSentService(Integer suid, Integer ruid);
+    boolean friendRequestAccepteService(Integer suid, Integer ruid);
+    boolean friendRequestRejectService(Integer suid, Integer ruid);
     List<User> getAllFriendService(Integer uid);
     List<User> getAllFriendRequestService(Integer uid);
 }

@@ -18,10 +18,6 @@ public class Friend {
     @Column(name = "uid2", nullable = false)
     private Integer uid2;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private FriendshipStatus status;
-
     @Column(name = "since", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime since;
 
@@ -31,13 +27,17 @@ public class Friend {
     }
 
     // Constructor with parameters
-    public Friend(Integer uid1, Integer uid2, FriendshipStatus status) {
+    public Friend(Integer uid1, Integer uid2) {
         this.uid1 = uid1;
         this.uid2 = uid2;
-        this.status = status;
         this.since = LocalDateTime.now(); // Ensure since is set to current timestamp
     }
 
+    public Friend(FriendId fid) {
+        this.uid1 = fid.getUid1();
+        this.uid2 = fid.getUid2();
+        this.since = LocalDateTime.now();
+    }
     // Getters and Setters
 
     public Integer getUid1() {
@@ -56,14 +56,6 @@ public class Friend {
         this.uid2 = uid2;
     }
 
-    public FriendshipStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(FriendshipStatus status) {
-        this.status = status;
-    }
-
     public LocalDateTime getSince() {
         return since;
     }
@@ -77,7 +69,6 @@ public class Friend {
         return "Friend{" +
                 "uid1=" + uid1 +
                 ", uid2=" + uid2 +
-                ", status=" + status +
                 ", since=" + since +
                 '}';
     }
@@ -89,13 +80,12 @@ public class Friend {
         Friend friend = (Friend) o;
         return Objects.equals(uid1, friend.uid1) &&
                 Objects.equals(uid2, friend.uid2) &&
-                status == friend.status &&
                 Objects.equals(since, friend.since);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uid1, uid2, status, since);
+        return Objects.hash(uid1, uid2, since);
     }
 
 }

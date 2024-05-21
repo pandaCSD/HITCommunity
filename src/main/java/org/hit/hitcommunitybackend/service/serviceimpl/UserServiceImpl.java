@@ -1,11 +1,12 @@
 package org.hit.hitcommunitybackend.service.serviceimpl;
 
 import jakarta.annotation.Resource;
-import org.hit.hitcommunitybackend.domain.User;
+import org.hit.hitcommunitybackend.domain.*;
+import org.hit.hitcommunitybackend.repository.FriendDao;
+import org.hit.hitcommunitybackend.repository.RequestDao;
 import org.hit.hitcommunitybackend.repository.UserDao;
 import org.hit.hitcommunitybackend.service.UserService;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +14,8 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     @Resource private UserDao userDao;
-
+    @Resource private FriendDao friendDao;
+    @Resource private RequestDao requestDao;
 
     @Override
     public User userRegisterService(String uname, String upassword) {
@@ -77,34 +79,62 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
     @Override
     public boolean userDeleteFriendService(Integer uid1, Integer uid2) {
+        FriendId fid = new FriendId(uid1, uid2);
+        if(friendDao.existsById(fid)) {
+            friendDao.deleteById(fid);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean friendRequestSentService(Integer suid, Integer ruid) {
+        // 检查请求是否已经存在
+        RequestId rid = new RequestId(suid, ruid);
+        requestDao.save(new Request(rid, "PENDING"));
+        return true;
+    }
+
+    @Override
+    public boolean friendRequestAccepteService(Integer suid, Integer ruid) {
+        FriendId fid = new FriendId(suid, ruid);
+        RequestId rid = new RequestId(suid, ruid);
+        Optional<Request> r =  requestDao.findById(rid);
+        if(r.isPresent()) {
+            if(r.get().getStatus().equals("PENDING")) {
+                requestDao.deleteById(rid);
+                friendDao.save(new Friend(fid));
+                return true;
+            }
+            return false;
+        }
         return false;
     }
 
     @Override
-    public boolean friendRequestSentService(Integer uid1, Integer uid2) {
-        return false;
-    }
-
-    @Override
-    public boolean friendRequestAccepteService(Integer uid1, Integer uid2) {
-        return false;
-    }
-
-    @Override
-    public boolean friendRequestRejecteService(Integer uid1, Integer uid2) {
+    public boolean friendRequestRejectService(Integer suid, Integer ruid) {
+        RequestId rid = new RequestId(suid, ruid);
+        if (requestDao.existsById(rid)) {
+            requestDao.save(new Request(rid, "REJECTED"));
+            return true;
+        }
         return false;
     }
 
     @Override
     public List<User> getAllFriendService(Integer uid) {
-        return List.of();
+        List<User> friends = friendDao.findAllFriend(uid);
+        for(User user : friends) {
+            user.setUpassword("");
+        }
+        return friends;
     }
 
     @Override
     public List<User> getAllFriendRequestService(Integer uid) {
-        return List.of();
+         return requestDao.findAllRequest(uid);
     }
 }
