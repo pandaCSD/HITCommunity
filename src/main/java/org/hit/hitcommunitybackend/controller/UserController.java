@@ -24,7 +24,7 @@ public class UserController {
         User u = userService.userRegisterService(user.getUname(), user.getUpassword());
         Result<User> result = new Result<>();
         if(u == null) {
-            result.setResultFailed("创建用户失败");
+            result.setResultFailed("创建用户失败", pid);
         } else {
             result.setResultSuccess("创建用户成功", u);
         }
@@ -36,7 +36,7 @@ public class UserController {
         Result<User> result = new Result<>();
         User u = userService.userLoginService(user.getUname(), user.getUpassword());
         if(u == null) {
-            result.setResultFailed("登录失败");
+            result.setResultFailed("登录失败", pid);
         } else {
             u.setUpassword("");
             result.setResultSuccess("登录成功", u);

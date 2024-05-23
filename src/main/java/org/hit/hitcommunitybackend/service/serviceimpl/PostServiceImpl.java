@@ -44,12 +44,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post postDeleteService(Integer pid) {
-        Post post = postDao.findById(pid).orElse(null);
-        postDao.deleteById(pid);
-        if (post!=null){
+        Optional<Post> post = postDao.findById(pid);
+        if (post.isPresent()) {
+            postDao.deleteById(pid);
             log.info("Post num:{} deleted", pid);
+        }else{
+            log.error("Post not found");
+            return null;
         }
-        return post;
+        return post.get();
     }
 
     @Override

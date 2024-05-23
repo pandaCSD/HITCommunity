@@ -9,6 +9,8 @@ public class Result<T> implements Serializable {
     //是否操作成功
     private boolean success;
 
+    private ErrorCode errorCode;
+
     //返回的数据主体（返回的内容）
     private T data;
 
@@ -51,9 +53,11 @@ public class Result<T> implements Serializable {
     }
 
     //设定结果为失败
-    public void setResultFailed(String msg) {
+    public void setResultFailed(String msg, ErrorCode errcode) {
         this.message = msg;
         this.success = false;
         this.data = null;
+        this.errorCode = errcode;
     }
 }
+
