@@ -51,9 +51,14 @@ public class Result<T> implements Serializable {
         this.success = true;
         this.data = data;
     }
-
     //设定结果为失败
-    public void setResultFailed(String msg, ErrorCode errcode) {
+    public void setResultFailed(String msg) {
+        this.message = msg;
+        this.success = false;
+        this.data = null;
+    }
+    //设定结果为失败
+    public void setResultFailedWithErrorCode(String msg, ErrorCode errcode) {
         this.message = msg;
         this.success = false;
         this.data = null;

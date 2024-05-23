@@ -43,6 +43,33 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Post postDeleteService(Integer pid, Integer uid) {
+        Optional<Post> post = postDao.findById(uid);
+        Optional<User> user = userDao.findById(uid);
+
+        if (post.isPresent() && user.isPresent()) {
+
+            Post postToDelete = post.get();
+            User userToDelete = user.get();
+            // Post的所有人不是当前传入的User
+            if (postToDelete.getPowner().getUid() != userToDelete.getUid()){
+                log.error("Post not owned by this user");
+                return null;
+            }
+            postDao.delete(postToDelete);
+            return postToDelete;
+        }else if (post.isPresent()) {
+            log.error("User not found in postDeleteService");
+            return null;
+        }else if (user.isPresent()) {
+            log.error("Post not found in postDeleteService");
+            return null;
+        }
+
+        return null;
+    }
+
+    @Override
     public Post postDeleteService(Integer pid) {
         Optional<Post> post = postDao.findById(pid);
         if (post.isPresent()) {
@@ -102,7 +129,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post repostService(Integer uid, Integer pid) {
+    public Repost repostService(Integer uid, Integer pid) {
         Optional<Post> post = postDao.findById(pid);
         Optional<User> user = userDao.findById(uid);
         Repost repost = new Repost();
@@ -120,8 +147,8 @@ public class PostServiceImpl implements PostService {
             log.error("User not found in post_repost");
             return null;
         }
-        repostDao.save(repost);
-        return post.get();
+        Repost rp =  repostDao.save(repost);
+        return rp;
     }
 
     @Override
@@ -134,5 +161,16 @@ public class PostServiceImpl implements PostService {
             }
         }
         return needs;
+    }
+
+    @Override
+    public Optional<Post> getPostById(Integer pid) {
+        Optional<Post> res = postDao.findById(pid);
+        if (res.isPresent()) {
+            return res;
+        }else{
+            log.error("Post not found in  getPostById()");
+            return Optional.empty();
+        }
     }
 }
