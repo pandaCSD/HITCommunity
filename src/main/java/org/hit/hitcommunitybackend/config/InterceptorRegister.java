@@ -1,12 +1,10 @@
 package org.hit.hitcommunitybackend.config;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +30,7 @@ public class InterceptorRegister implements WebMvcConfigurer {
         List<String> pathPatterns = new ArrayList<>();
         pathPatterns.add("/users/login");
         pathPatterns.add("/users/register");
+        pathPatterns.add("/users/is-login");
         registry.addInterceptor(getInterceptor()).excludePathPatterns(pathPatterns);
     }
 }
