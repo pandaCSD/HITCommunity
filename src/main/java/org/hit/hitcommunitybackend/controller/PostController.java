@@ -1,10 +1,11 @@
 package org.hit.hitcommunitybackend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.hit.hitcommunitybackend.domain.Comment;
 import org.hit.hitcommunitybackend.domain.Post;
 import org.hit.hitcommunitybackend.domain.Repost;
+import org.hit.hitcommunitybackend.domain.User;
 import org.hit.hitcommunitybackend.model.Result;
-import org.hit.hitcommunitybackend.repository.UserDao;
 import org.hit.hitcommunitybackend.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +22,18 @@ public class PostController {
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
     private final PostService postService;
 
-    public static final String SESSION_NAME = "post";
-    private final UserDao userDao;
+    public static final String SESSION_NAME = "user";
 
-    public PostController(PostService postService, UserDao userDao) {
+    public PostController(PostService postService) {
         this.postService = postService;
-        this.userDao = userDao;
     }
+    // private final UserDao userDao;
 
-    @PostMapping("/{uid}/post")
-    public Result<Post> createPost(@RequestBody Post post, @PathVariable Integer uid) {
+
+    @PostMapping("/post")
+    public Result<Post> createPost(@RequestBody Post post, HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
         Post p = postService.postPublishService(uid,post);
         Result<Post> result = new Result<>();
         result.setData(p);
@@ -38,15 +41,15 @@ public class PostController {
         return result;
     }
 
-    // 这需要传入一个uid和一个pid删除帖子，已经验证了Post的uid和路径中的uid是否相等
-    @PostMapping("/{uid}/delete/{pid}")
-    public Result<Post> deletePost(@PathVariable Integer pid, @PathVariable Integer uid) {
-        Post post = postService.postDeleteService(pid,uid);
+    // 这需要传入一个pid删除帖子
+    @PostMapping("/delete/{pid}")
+    public Result<Post> deletePost(@PathVariable Integer pid) {
+        Post post = postService.postDeleteService(pid);
         Result<Post> result = new Result<>();
 
         // 删除失败返回null
         if (post == null) {
-            result.setResultFailedWithErrorCode("delete Post err, Post"+pid+" not owned by user " +uid,ErrPostIdNotFound);
+            result.setResultFailedWithErrorCode("delete Post err, Post"+pid,ErrPostIdNotFound);
         }else{
             result.setResultSuccess("Post deleted successfully");
             result.setData(post);
@@ -67,8 +70,11 @@ public class PostController {
     }
 
     // 这需要传入一个uid和一个pid喜欢帖子
-    @PostMapping("/{uid}/like/{pid}")
-    public Result<Integer> likePost(@PathVariable Integer pid, @PathVariable Integer uid){
+    @PostMapping("/like/{pid}")
+    public Result<Integer> likePost(@PathVariable Integer pid, HttpServletRequest request){
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+
         Result<Integer> result = new Result<>();
         Integer lid = postService.postLikeService(uid,pid);
 
@@ -82,8 +88,11 @@ public class PostController {
         return null;
     }
 
-    @PostMapping("/{uid}/comment/{pid}")
-    public Result<Integer> commentPost(@PathVariable Integer pid, @PathVariable Integer uid, @RequestBody Comment comment){
+    @PostMapping("/comment/{pid}")
+    public Result<Integer> commentPost(@PathVariable Integer pid, @RequestBody Comment comment, HttpServletRequest request){
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+
         Result<Integer> result = new Result<>();
         Integer lid = postService.postCommentService(uid,pid,comment);
         if (lid != null){
@@ -95,8 +104,10 @@ public class PostController {
         return result;
     }
 
-    @PostMapping("/{uid}/repost/{pid}")
-    public Result<Repost> createRePost(@PathVariable Integer pid, @PathVariable Integer uid) {
+    @PostMapping("/repost/{pid}")
+    public Result<Repost> createRePost(@PathVariable Integer pid, HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
         Repost p = postService.repostService(uid, pid);
         Result<Repost> result = new Result<>();
 
@@ -110,8 +121,11 @@ public class PostController {
     }
 
     // 根据uid获取所有post
-    @GetMapping("/{uid}/posts")
-    public Result<List<Post>> getPosts(@PathVariable Integer uid) {
+    @GetMapping("/posts")
+    public Result<List<Post>> getPosts(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+
         List<Post> res = postService.getAllPost(uid);
         Result<List<Post>> result = new Result<>();
         result.setData(res);
