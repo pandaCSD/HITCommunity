@@ -22,7 +22,7 @@ public class UserInterceptor implements HandlerInterceptor {
         User sessionUser = (User) session.getAttribute(UserController.SESSION_NAME);
         // 若session中没有用户信息这说明用户未登录
         if (sessionUser == null) {
-            response.sendRedirect("/page-login");
+            response.sendRedirect("/");
             return false;
         } else {
             return true;
@@ -40,5 +40,4 @@ public class UserInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
 
     }
-
 }
