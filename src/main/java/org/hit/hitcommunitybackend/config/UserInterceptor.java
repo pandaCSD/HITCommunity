@@ -15,11 +15,15 @@ public class UserInterceptor implements HandlerInterceptor {
     // Controller方法执行之前
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 同样在这里调用用户服务传入session，判断用户是否登录或者有效
-        // 未登录则重定向至主页（假设主页就是/）
+        // 检查是否为OPTIONS请求
+        if (request.getMethod().equals("OPTIONS")) {
+            return true; // 直接允许OPTIONS请求通过
+        }
+
         // 从session中取出用户信息
         HttpSession session = request.getSession();
         User sessionUser = (User) session.getAttribute(UserController.SESSION_NAME);
+
         // 若session中没有用户信息这说明用户未登录
         if (sessionUser == null) {
             response.sendRedirect("/");

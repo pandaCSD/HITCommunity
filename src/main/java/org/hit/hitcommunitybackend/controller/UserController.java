@@ -2,6 +2,7 @@ package org.hit.hitcommunitybackend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.hit.hitcommunitybackend.domain.Request;
 import org.hit.hitcommunitybackend.domain.User;
 import org.hit.hitcommunitybackend.model.Result;
 import org.hit.hitcommunitybackend.service.UserService;
@@ -10,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5599")
 @RequestMapping("/user")
-@CrossOrigin(origins = "*")
 public class UserController {
 
     private final UserService userService;
@@ -180,12 +181,9 @@ public class UserController {
         HttpSession session = request.getSession();
         User u = (User) session.getAttribute(SESSION_NAME);
         Result<List<User>> result = new Result<>();
-        List<User> friends = userService.getAllFriendRequestService(u.getUid());
-        if(friends != null) {
-            for(User user : friends) {
-                user.setUpassword("");
-            }
-            result.setResultSuccess("获取好友申请成功", friends);
+        List<User> users = userService.getAllFriendRequestService(u.getUid());
+        if(users != null) {
+            result.setResultSuccess("获取好友申请成功", users);
         } else {
             result.setResultFailed("获取好友申请失败");
         }

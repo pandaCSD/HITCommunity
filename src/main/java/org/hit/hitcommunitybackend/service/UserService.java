@@ -1,5 +1,6 @@
 package org.hit.hitcommunitybackend.service;
 
+import org.hit.hitcommunitybackend.domain.Request;
 import org.hit.hitcommunitybackend.domain.User;
 
 import java.util.List;
