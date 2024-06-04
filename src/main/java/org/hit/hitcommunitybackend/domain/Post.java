@@ -26,6 +26,9 @@ public class Post {
     @JoinColumn(name = "powner", nullable = false, foreignKey = @ForeignKey(name = "FK_POSTS_USERS"))
     private User powner;
 
+    @Column(name = "pcontent", nullable = true)
+    private String pcontent;
+
     // Default constructor
     public Post() {
         this.ptime = LocalDateTime.now(); // Ensure ptime is set to current timestamp
@@ -69,6 +72,7 @@ public class Post {
                 "pid=" + pid +
                 ", ptime=" + ptime +
                 ", powner=" + powner +
+                ", pcontent='" + pcontent + +
                 '}';
     }
 }
