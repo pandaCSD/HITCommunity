@@ -17,4 +17,6 @@ public interface UserService {
     boolean friendRequestRejectService(Integer suid, Integer ruid);
     List<User> getAllFriendService(Integer uid);
     List<User> getAllFriendRequestService(Integer uid);
+    User userFindByUnameService(String uname);
+    User userFindByUidService(Integer uid);
 }

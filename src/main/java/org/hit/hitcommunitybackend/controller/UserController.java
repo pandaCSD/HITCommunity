@@ -2,13 +2,13 @@ package org.hit.hitcommunitybackend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.hit.hitcommunitybackend.domain.Request;
 import org.hit.hitcommunitybackend.domain.User;
 import org.hit.hitcommunitybackend.model.Result;
 import org.hit.hitcommunitybackend.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5599")
@@ -42,9 +42,13 @@ public class UserController {
         if(u == null) {
             result.setResultFailed("登录失败");
         } else {
+            User x = new User();
+            x.setUname(user.getUname());
+            x.setUpassword(user.getUpassword());
+            x.setUid(u.getUid());
+            request.getSession().setAttribute(SESSION_NAME, x);
             u.setUpassword("");
             result.setResultSuccess("登录成功", u);
-            request.getSession().setAttribute(SESSION_NAME, u);
         }
         return result;
     }
@@ -58,38 +62,45 @@ public class UserController {
         if (u == null) {
             result.setResultFailed("未登录");
         } else {
-            u.setUpassword("");
-            result.setResultSuccess("已登录", u);
+            User x = new User();
+            x.setUname(u.getUname());
+            x.setUid(u.getUid());
+            x.setUpassword("");
+            result.setResultSuccess("已登录", x);
         }
         return result;
     }
 
     @PutMapping("/update/username")
-    public Result<User> updateUsername(@RequestParam String uname, HttpServletRequest request) {
+    public Result<Void> updateUsername(@RequestParam String uname, HttpServletRequest request) {
         HttpSession session = request.getSession();
         User u = (User) session.getAttribute(SESSION_NAME);
         User u1 = userService.userUpdateUnameService(u.getUid(), uname);
-        Result<User> result = new Result<>();
+        Result<Void> result = new Result<>();
         if(u1 == null) {
             result.setResultFailed("更新用户名失败");
         } else {
-            u1.setUpassword("");
-            result.setResultSuccess("更新用户名成功", u1);
             request.getSession().setAttribute(SESSION_NAME, u1);
+            result.setResultSuccess("更新用户名成功");
         }
         return result;
     }
 
     @PutMapping("/update/password")
-    public Result<Void> updatePassword(@RequestParam String upassword, HttpServletRequest request) {
+    public Result<Void> updatePassword(@RequestParam String oldPassword, @RequestParam String newPassword, HttpServletRequest request) {
         HttpSession session = request.getSession();
         User u = (User) session.getAttribute(SESSION_NAME);
-        User u1 = userService.userUpdateUpasswordService(u.getUid(), u.getUpassword());
         Result<Void> result = new Result<>();
-        if(u1 == null) {
-            result.setResultFailed("更新用户密码失败");
+        if(Objects.equals(u.getUpassword(), oldPassword)) {
+            User u1 = userService.userUpdateUpasswordService(u.getUid(), newPassword);
+            if(u1 == null) {
+                result.setResultFailed("更新用户密码失败");
+            } else {
+                result.setResultSuccess("更新用户密码成功");
+                request.getSession().setAttribute(SESSION_NAME, u1);
+            }
         } else {
-            result.setResultSuccess("更新用户密码成功");
+            result.setResultFailed("用户密码错误");
         }
         return result;
     }
@@ -186,6 +197,32 @@ public class UserController {
             result.setResultSuccess("获取好友申请成功", users);
         } else {
             result.setResultFailed("获取好友申请失败");
+        }
+        return result;
+    }
+
+    @GetMapping("/find/uname/{uname}")
+    public Result<User> findUserByUname(@PathVariable String uname, HttpServletRequest request) {
+        Result<User> result = new Result<>();
+        User user = userService.userFindByUnameService(uname);
+        if(user != null) {
+            user.setUpassword("");
+            result.setResultSuccess("查询朋友成功", user);
+        } else {
+            result.setResultFailed("用户不存在");
+        }
+        return result;
+    }
+
+    @GetMapping("/find/uid/{uid}")
+    public Result<User> findUserByUid(@PathVariable Integer uid, HttpServletRequest request) {
+        Result<User> result = new Result<>();
+        User user = userService.userFindByUidService(uid);
+        if(user != null) {
+            user.setUpassword("");
+            result.setResultSuccess("查询朋友成功", user);
+        } else {
+            result.setResultFailed("用户不存在");
         }
         return result;
     }

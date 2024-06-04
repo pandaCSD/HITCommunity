@@ -137,4 +137,14 @@ public class UserServiceImpl implements UserService {
     public List<User> getAllFriendRequestService(Integer uid) {
          return requestDao.findAllRequest(uid);
     }
+
+    @Override
+    public User userFindByUnameService(String uname) {
+        return userDao.findByUname(uname);
+    }
+
+    @Override
+    public User userFindByUidService(Integer uid) {
+        return userDao.findByUid(uid);
+    }
 }
