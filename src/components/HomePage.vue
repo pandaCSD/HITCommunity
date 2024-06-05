@@ -1,23 +1,12 @@
 <template>
   <v-app>
     <v-navigation-drawer v-model="drawer" app permanent>
-      <!-- <v-list>
-        <v-list-item
-          v-for="item in menuItems"
-          :key="item.title"
-          @click="currentComponent = item.component"
-        >
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list> -->
       <v-list>
       <v-list-item-group>
         <v-list-item 
           v-for="item in menuItems" 
           :key="item.title"
-          @click="currentComponent = item.component">
+          @click="handleClick(item)">
           <v-list-item-content>
             <v-list-item-title v-text="item.title"></v-list-item-title>
           </v-list-item-content>
@@ -26,12 +15,12 @@
             <v-icon>mdi-chevron-down</v-icon>
           </v-list-item-action>
 
-          <v-list-item-action v-else>
-            <v-icon>mdi-chevron-right</v-icon>
-          </v-list-item-action>
-
           <v-list-item-group v-if="item.children">
-            <v-list-item v-for="(child, i) in item.children" :key="i">
+            <v-list-item 
+              v-for="child in item.children" 
+              :key="child.title"
+              @click="currentComponent = child.component"
+              >
               <v-list-item-content>
                 <v-list-item-title v-text="child.title"></v-list-item-title>
               </v-list-item-content>
@@ -44,7 +33,7 @@
 
     <v-app-bar app>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Application bar</v-toolbar-title>
+      <v-toolbar-title>哈工大圈子</v-toolbar-title>
     </v-app-bar>
 
     <v-main>
@@ -58,32 +47,47 @@
 <script>
 import UserPage from '@/components/UserPage.vue';
 import WelcomePage from '@/components/WelcomePage.vue';
+import FriendListPage from '@/components/FriendListPage.vue'
+import FriendRequestPage from '@/components/FriendRequestPage.vue'
+import FriendFindPage from '@/components/FriendFindPage.vue'
 
 export default {
   name: 'MainPage',
   components: {
     WelcomePage,
     UserPage,
+    FriendListPage,
+    FriendRequestPage,
+    FriendFindPage,
   },
   data() {
     return {
       drawer: true, // 默认保持抽屉打开
-      currentComponent: null, // 当前显示的组件
+      currentComponent: WelcomePage, // 当前显示的组件
       menuItems: [
-        { title: 'UserPage', component: 'UserPage' },
+        { title: '欢迎', component: 'WelcomePage'},
+        { title: '用户', component: 'UserPage' },
         // 这里可以添加更多的菜单项
-        { title: 'WelcomePage', component: 'WelcomePage'},
         {
-          title: 'A栏目',
+          title: '朋友',
           icon: 'mdi-folder',
           children: [
-            { title: 'UserPage', component: 'UserPage' },
-            { title: 'WelcomePage', component: 'WelcomePage'},
+            { title: '好友列表', component: 'FriendListPage' },
+            { title: '好友搜索', component: 'FriendFindPage' },
+            { title: '好友申请', component: 'FriendRequestPage' },
           ]
         },
       ],
-    };
+    }
   },
+  methods: {
+    handleClick(item) {
+      // Change the component only if there are no children
+      if (!item.children) {
+        this.currentComponent = item.component;
+      }
+    }
+  }
 };
 </script>
 

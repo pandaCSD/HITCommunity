@@ -37,25 +37,24 @@ export default {
   },
   methods: {
     async submitForm() {
-      this.$router.push('/home');
-      // try {
-      //   const response = await this.$axios.post('/users/login', {
-      //     uid : -1,
-      //     uname: this.username,
-      //     upassword: this.password
-      //   });
-      //
-      //   if (response.data.success) {
-      //     console.log('Login successful:', response.data);
-      //     // Handle successful login, e.g., redirect to another page
-      //   } else {
-      //     console.error('Login failed:', response.data.message);
-      //     alert('Login failed: ' + response.data.message);
-      //   }
-      // } catch (error) {
-      //   console.error('Error during login:', error);
-      //   alert('An error occurred during login.');
-      // }
+      try {
+        const response = await this.$axios.post('/user/login', {
+          uid : -1,
+          uname: this.username,
+          upassword: this.password
+        });
+        if (response.data.success) {
+          console.log('Login successful:', response.data);
+          // Handle successful login, e.g., redirect to another page
+          this.$router.push('/home');
+        } else {
+          console.error('Login failed:', response.data.message);
+          alert('Login failed: ' + response.data.message);
+        }
+      } catch (error) {
+        console.error('Error during login:', error);
+        alert('An error occurred during login.');
+      }
     },
     openRegisterForm() {
       this.$refs.registerForm.open();

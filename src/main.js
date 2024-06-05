@@ -7,7 +7,8 @@ import { loadFonts } from './plugins/webfontloader';
 
 // 创建 axios 实例并配置默认值
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8080'
+    baseURL: 'http://localhost:8080',
+    withCredentials: true // 确保发送请求时携带 cookies
 });
 
 // 加载字体
@@ -20,7 +21,7 @@ const app = createApp(App);
 app.use(router);
 app.use(vuetify);
 
-// 将 axios 实例添加到 Vue 全局属性
+// 将 axios 实例添加到 Vue 全局属性，这样在组件中可以通过 this.$axios 访问
 app.config.globalProperties.$axios = axiosInstance;
 
 // 挂载 Vue 应用
