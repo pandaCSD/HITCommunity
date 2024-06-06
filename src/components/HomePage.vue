@@ -30,7 +30,7 @@
       </v-list-item-group>
     </v-list>
     </v-navigation-drawer>
-
+    
     <v-app-bar app>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>哈工大圈子</v-toolbar-title>
@@ -50,6 +50,9 @@ import WelcomePage from '@/components/WelcomePage.vue';
 import FriendListPage from '@/components/FriendListPage.vue'
 import FriendRequestPage from '@/components/FriendRequestPage.vue'
 import FriendFindPage from '@/components/FriendFindPage.vue'
+import PostPage from '@/components/PostPage.vue'
+import PostsPage from '@/components/PostsPage.vue'
+
 
 export default {
   name: 'MainPage',
@@ -59,6 +62,8 @@ export default {
     FriendListPage,
     FriendRequestPage,
     FriendFindPage,
+    PostPage,
+    PostsPage,
   },
   data() {
     return {
@@ -76,6 +81,12 @@ export default {
             { title: '好友搜索', component: 'FriendFindPage' },
             { title: '好友申请', component: 'FriendRequestPage' },
           ]
+        },
+        {
+          title: '发布', component: 'PostPage',
+        },
+        {
+          title: '话题', component: 'PostsPage',
         },
       ],
     }
