@@ -14,6 +14,10 @@
       <button class="btn" type="submit">Login</button>
       <!-- 注册按钮 -->
       <button class="btn register-btn" type="button" @click="openRegisterForm">Register</button>
+      <!-- 忘记密码按钮 -->
+      <button class="btn forgot-btn" type="button" @click="game">A Little Game
+      </button>
+   
     </form>
     <RegisterForm ref="registerForm"/>
   </div>
@@ -58,6 +62,9 @@ export default {
     },
     openRegisterForm() {
       this.$refs.registerForm.open();
+    },
+    game(){
+      window.location.href='game/game.html';
     }
   }
 }
