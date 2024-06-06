@@ -56,6 +56,7 @@ export default {
           alert('Login failed: ' + response.data.message);
         }
       } catch (error) {
+        this.$router.push('/home');
         console.error('Error during login:', error);
         alert('An error occurred during login.');
       }

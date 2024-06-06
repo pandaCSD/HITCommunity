@@ -36,11 +36,14 @@
     <v-btn icon @click="goToTopic(item)">
       <v-icon>mdi-eye</v-icon>
     </v-btn>
-    <p>{{ item.topic }}</p> <!-- 显示 topic 信息 -->
+    <div class="item-content">
+      <p class="item-topic">{{ item.topic }}</p>
+      <p class="item-activity">活跃时间：{{ item.activity }}</p>
+      <p class="item-replies">评论数：{{ item.replies }}</p>
+      <p class="item-views">热度：{{ item.views }}</p>
+    </div>
   </div>
 </template>
-
-
             </v-data-table>
           </v-col>
         </v-row>
@@ -97,7 +100,8 @@
     methods: {
       createNewTopic() {
         // 创建新主题的逻辑
-        alert('将在此处实现新主题创建功能。');
+        // alert('将在此处实现新主题创建功能。');
+        this.$router.push("/posttopic");
       },
       goToTopic(item) {
         // 导航到主题的逻辑
@@ -113,3 +117,41 @@
   }
   </style>
   
+<style>
+.item-container {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.3s ease;
+}
+
+.item-container:hover {
+  background-color: #f9f9f9;
+}
+
+.v-btn {
+  margin-right: 10px;
+}
+
+.item-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-content p {
+  margin: 2px 0;
+}
+
+.item-topic {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.item-activity,
+.item-replies,
+.item-views {
+  color: #757575;
+  font-size: 0.9em;
+}
+</style>
