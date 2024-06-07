@@ -2,6 +2,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'; // 使用 creat
 import Login from '../components/LoginPage.vue';
 import Home from '../components/HomePage.vue';
 import PostPage from '@/components/PostPage.vue';
+import PostDetail from '@/components/PostDetail.vue';
+// import { compile } from 'vue';
 
 const routes = [
     {
@@ -18,6 +20,11 @@ const routes = [
         path: '/posttopic',
         name: 'Post',
         component: PostPage
+    },
+    {
+        path: '/post/:id',
+        name: 'PostDetail',
+        component: PostDetail,
     }
 ];
 
