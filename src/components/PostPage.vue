@@ -87,20 +87,21 @@ export default {
       this.filePreviews = this.filePreviews.concat(newFilePreviews);
     },
     async submitPost() {
-      /*
       const formData = new FormData();
       formData.append('title', this.title);
-      formData.append('text', this.text);
-      */
+      formData.append('text', this.text);  // 确保这里传递了 `text` 字段
+
       try {
-        await this.$axios.post('/post/post', {
-          
-        });
-        console.log('Post submitted successfully');
-        this.title = '';
-        this.text = '';
+          await this.$axios.post('/post/post', formData,{
+            headers: {
+                'Content-Type': 'application/json'
+            }
+          });
+          console.log('Post submitted successfully');
+          this.title = '';
+          this.text = '';
       } catch (error) {
-        console.error('Error submitting post: ', error);
+          console.error('Error submitting post: ', error);
       }
     }
   }
