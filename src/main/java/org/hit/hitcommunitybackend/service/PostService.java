@@ -16,4 +16,5 @@ public interface PostService {
     Repost repostService(Integer uid, Integer pid); //转发帖子
     List<Post> getAllPost(Integer uid); //帖子列表
     Optional<Post> getPostById(Integer pid);
+    List<Post> getAllofPost();
 }
