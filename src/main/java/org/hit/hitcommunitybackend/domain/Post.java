@@ -25,16 +25,32 @@ public class Post {
     @ManyToOne
     @JoinColumn(name = "powner", nullable = false, foreignKey = @ForeignKey(name = "FK_POSTS_USERS"))
     private User powner;
-
+    
+    @Column(name = "title", nullable = false)
+    private String title;
+    
+    @Column(name = "text", nullable = false)
+    private String text;
+    
+    public String getTitle() {
+        return title;
+    }
+    
+    public String getText() {
+        return text;
+    }
+    
     // Default constructor
     public Post() {
         this.ptime = LocalDateTime.now(); // Ensure ptime is set to current timestamp
     }
 
     // Constructor with parameters
-    public Post(LocalDateTime ptime, User powner) {
+    public Post(LocalDateTime ptime, User powner, String title, String text) {
         this.ptime = ptime;
         this.powner = powner;
+        this.title = title;
+        this.text = text;
     }
 
     // Getters and Setters
