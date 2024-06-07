@@ -23,7 +23,7 @@
           <tr>
             <th>User</th>
             <th>Comment</th>
-            <th>Comment At</th>
+            <th>Comment Time</th>
           </tr>
         </thead>
         <tbody>
@@ -140,20 +140,13 @@
             try {
                 const postId = this.$route.params.id;
                 const response = await this.$axios.post(`/post/comment/${postId}`, {
-                    content: this.newComment,
+                    ccontent: this.newComment,
                 });
                 
                 if (response.data.success) {
-                // 添加新评论到本地评论列表
-                this.comments.push({
-                    ccontent: this.newComment,
-                    cid: response.data.data.cid, // 假设后端返回新评论的ID
-                    ctime: new Date().toISOString(), // 设置当前时间
-                    pid: postId,
-                    uid: this.$store.state.user.id, // 假设有登录用户的ID
-                    uname: this.$store.state.user.uname, // 假设有登录用户的用户名
-                });
-                this.newComment = ''; // 清空输入框
+                  console.log(response.data.data);
+                
+                  this.newComment = ''; // 清空输入框
                 } else {
                 console.log('Error submitting comment');
                 }
