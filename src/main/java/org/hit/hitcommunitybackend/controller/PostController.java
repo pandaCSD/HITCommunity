@@ -102,8 +102,8 @@ public class PostController {
         Result<Integer> result = new Result<>();
         Integer lid = postService.postCommentService(uid,pid,comment);
         if (lid != null){
-            result.setData(lid);
             result.setResultSuccess("Comment successfully");
+            result.setData(lid);
         }else {
             result.setResultFailedWithErrorCode("User Not Found Or Post not found!!",ErrCommentFound);
         }
