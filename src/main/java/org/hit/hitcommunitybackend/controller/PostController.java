@@ -63,8 +63,8 @@ public class PostController {
         Result<Post> result = new Result<>();
         if (opost.isPresent()){
             Post p = opost.get();
-            result.setData(p);
             result.setResultSuccess("Post who's id:"+pid+" found");
+            result.setData(p);
         }
         return result;
     }
@@ -130,6 +130,25 @@ public class PostController {
         Result<List<Post>> result = new Result<>();
         result.setData(res);
         result.setResultSuccess("All posts who's uid is satisfied found Here!!");
+        return result;
+    }
+    
+    // 根据uid获取所有post
+    @GetMapping("/allposts")
+    public Result<List<Post>> getallPosts(HttpServletRequest request) {
+        List<Post> res = postService.getAllofPost();
+        
+        
+        // 调试输出以确认是否获取到了数据
+        if (res == null || res.isEmpty()) {
+            System.out.println("No posts found");
+        } else {
+            System.out.println("Posts found: " + res.size());
+        }
+        
+        Result<List<Post>> result = new Result<>();
+        result.setResultSuccess("All posts who's uid is satisfied found Here!!");
+        result.setData(res);
         return result;
     }
 
