@@ -83,10 +83,12 @@ export default {
           ]
         },
         {
-          title: '发布', component: 'PostPage',
-        },
-        {
-          title: '话题', component: 'PostsPage',
+          title: '圈子',
+          icon: 'mdi-folder',
+          children: [
+            { title: '发布', component: 'PostPage' },
+            { title: '话题', component: 'PostsPage'},
+          ]
         },
       ],
     }

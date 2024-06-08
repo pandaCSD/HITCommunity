@@ -63,14 +63,12 @@
 </template>
 
 <script>
-// eslint-disable-next-line
-import axios from 'axios';
-
 export default {
   data() {
     return {
       title: '',
       text: '',
+      pid: 123, // 示例pid，可以根据需要动态设置
       files: [],
       filePreviews: [],
     };
@@ -86,22 +84,48 @@ export default {
       this.files = this.files.concat(newFiles);
       this.filePreviews = this.filePreviews.concat(newFilePreviews);
     },
+    async uploadImage(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('pid', this.pid);
+
+      try {
+        const response = await this.$axios.post('/post/images/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        console.log('Image uploaded successfully:', response.data);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    },
     async submitPost() {
       const formData = new FormData();
       formData.append('title', this.title);
-      formData.append('text', this.text);  // 确保这里传递了 `text` 字段
+      formData.append('text', this.text);
 
+      // 上传图片
+      const uploadPromises = this.files.map(file => this.uploadImage(file));
+      
       try {
-          await this.$axios.post('/post/post', formData,{
-            headers: {
-                'Content-Type': 'application/json'
-            }
-          });
-          console.log('Post submitted successfully');
-          this.title = '';
-          this.text = '';
+        await Promise.all(uploadPromises);
+        console.log('All images uploaded successfully');
+        
+        // 这里可以继续处理其他表单数据的提交
+        await this.$axios.post('/post/post', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        console.log('Post submitted successfully');
+        this.title = '';
+        this.text = '';
+        this.files = [];
+        this.filePreviews = [];
       } catch (error) {
-          console.error('Error submitting post: ', error);
+        console.error('Error submitting post:', error);
       }
     }
   }
