@@ -1,12 +1,10 @@
 package org.hit.hitcommunitybackend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.hit.hitcommunitybackend.domain.Comment;
-import org.hit.hitcommunitybackend.domain.Post;
-import org.hit.hitcommunitybackend.domain.Repost;
-import org.hit.hitcommunitybackend.domain.User;
+import org.hit.hitcommunitybackend.domain.*;
 import org.hit.hitcommunitybackend.model.Result;
 import org.hit.hitcommunitybackend.repository.CommentDao;
+import org.hit.hitcommunitybackend.repository.ImageDao;
 import org.hit.hitcommunitybackend.repository.LikeDao;
 import org.hit.hitcommunitybackend.service.PostService;
 import org.slf4j.Logger;
@@ -28,17 +26,20 @@ import static org.hit.hitcommunitybackend.model.ErrorCode.*;
 @RestController
 @RequestMapping("/post")
 public class PostController {
+    private String baseURL = "http://localhost:8080";
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
     private final PostService postService;
 
     public static final String SESSION_NAME = "user";
     private final CommentDao commentDao;
     private final LikeDao likeDao;
+    private final ImageDao imageDao;
     
-    public PostController(PostService postService, CommentDao commentDao, LikeDao likeDao) {
+    public PostController(PostService postService, CommentDao commentDao, LikeDao likeDao, ImageDao imageDao) {
         this.postService = postService;
         this.commentDao = commentDao;
         this.likeDao = likeDao;
+        this.imageDao = imageDao;
     }
     // private final UserDao userDao;
 
@@ -181,7 +182,8 @@ public class PostController {
     }
 
     // 上传文件保存路径
-    private static String IMAGES_FOLDER = "D:\\code\\projects\\idea\\HITCommunityBackend\\src\\main\\resources\\static\\";
+    private static String IMAGES_FOLDER = "/static/images/";
+    private static String UpLoad_Image_FOLDER = "src/main/resources/static/images/";
 
     // 获取文件扩展名的辅助方法
     private String getFileExtension(String fileName) {
@@ -191,7 +193,7 @@ public class PostController {
         int dotIndex = fileName.lastIndexOf('.');
         return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
     }
-
+    private Integer ImageNumber = 0;
     @PostMapping("/images/upload")
     public Result<Void> uploadImage(@RequestParam("file") MultipartFile file,
                                     @RequestParam("pid") int pid,
@@ -216,11 +218,14 @@ public class PostController {
             // 获取文件扩展名
             String fileExtension = getFileExtension(file.getOriginalFilename());
             // 完整文件路径
-            String pathString = IMAGES_FOLDER + newFileName + "." + fileExtension;
+            String pathString = UpLoad_Image_FOLDER + newFileName + ImageNumber.toString()  + "." + fileExtension;
+            String updateDB_url = baseURL + IMAGES_FOLDER + newFileName+ ImageNumber.toString() + "." + fileExtension;
+            ImageNumber+=1;
             Path path = Paths.get(pathString);
             // 将文件写入指定路径
             Files.write(path, bytes);
-            postService.uploadImageService(pid, pathString);
+            // 存入数据库的路径进行修改
+            postService.uploadImageService(pid, updateDB_url);
             // 可以根据需要返回成功响应
             System.out.println("文件上传成功：" + path.toString());
             Result<Void> result = new Result<>();
@@ -232,6 +237,15 @@ public class PostController {
             result.setResultFailed("文件上传失败");
             return result;
         }
+    }
+    // get urls
+    @GetMapping("/images/get/{pid}")
+    public Result<List<Image>> getAllImages(@PathVariable Integer pid,HttpServletRequest request) {
+        List<Image> ret = imageDao.findByPid(pid);
+        Result<List<Image>> result = new Result<>();
+        result.setResultSuccess("All images found Here!!");
+        result.setData(ret);
+        return result;
     }
 
 }
