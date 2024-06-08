@@ -68,7 +68,7 @@ export default {
     return {
       title: '',
       text: '',
-      pid: 123, // 示例pid，可以根据需要动态设置
+      pid: 0, // 示例pid，可以根据需要动态设置
       files: [],
       filePreviews: [],
     };
@@ -104,22 +104,21 @@ export default {
       const formData = new FormData();
       formData.append('title', this.title);
       formData.append('text', this.text);
-
-      // 上传图片
-      const uploadPromises = this.files.map(file => this.uploadImage(file));
-      
       try {
+        
+        // console.log('All images uploaded successfully');
+        
+        const response = await this.$axios.post('/post/post', formData,{
+            headers: {
+                'Content-Type': 'application/json'
+            }
+          });
+          console.log('Post submitted successfully');
+          console.log(response);
+        this.pid = response.data.data.pid;
+        // 上传图片
+        const uploadPromises = this.files.map(file => this.uploadImage(file));
         await Promise.all(uploadPromises);
-        console.log('All images uploaded successfully');
-        
-        // 这里可以继续处理其他表单数据的提交
-        await this.$axios.post('/post/post', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        
-        console.log('Post submitted successfully');
         this.title = '';
         this.text = '';
         this.files = [];

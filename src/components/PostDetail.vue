@@ -2,13 +2,20 @@
     <div class="post-detail">
       <h1 class="post-title">{{ this.title }}</h1>
       <p class="post-text">{{ this.text }}</p>
+      
+        <!-- 图片展示部分 -->
+    <div class="images-section" v-if="image_urls.length > 0">
+      <h2></h2>
+      <div class="images-container">
+        <img v-for="image in image_urls" :src="image.url" :key="image.url" class="post-image" @click="openImageDialog(image.url)" />
+      </div>
       <p class="post-meta">
         Posted by: <strong>{{ postUname}}</strong>
       </p>
       <p class="post-meta">
         Posted at: <time>{{time}}</time>
       </p>
-      
+    </div>
         <!-- 点赞按钮和点赞数展示 -->
         <div class="like-section">
         <v-btn color="primary" @click="likePost">点赞</v-btn>
@@ -49,7 +56,10 @@
       ></v-text-field>
       <v-btn color="success" @click="submitComment">添加评论</v-btn>
     </div>
-      
+       <!-- 图片放大对话框 -->
+    <v-dialog v-model="dialog" max-width="800px">
+      <v-img :src="selectedImage" max-width="800px" max-height="800px" />
+    </v-dialog>
     </div>
   </template>
   
@@ -57,12 +67,17 @@
   export default {
     data() {
       return {
-        postUname: {},
+        postUname: '',
         comments: [],
-        title: {},
-        text: {},
-        time: {},
+        title: '',
+        text: '',
+        time: '',
         likes: 0,
+        image_urls: [],
+        newComment: '',
+        images: [],
+        dialog: false,
+        selectedImage: '',
       };
     },
     async mounted() {
@@ -118,8 +133,51 @@
         } catch (error) {
             console.error('Error fetching likes:', error);
         }
+
+        // 获取图片存储的urls
+        try{
+            const postId = this.$route.params.id;
+            const urls = await this.$axios.get(`/post/images/get/${postId}`);
+            if (urls.data.success){
+              console.log(urls.data.data);
+              urls.data.data.forEach(url => {
+                this.image_urls.push(
+                  {
+                    url: url.iurl,
+                  }
+                )
+              });
+              console.log("this urls get:::");
+              console.log(this.image_urls);
+              await this.loadImages() ;  // 调用方法加载图片
+              console.log("get images????");
+              console.log(this.images);
+            }else {
+            console.error('Error fetching likes:', urls.data);
+            }
+        } catch (error) {
+            console.error('Error fetching likes:', error);
+        }
     },
     methods: {
+      async loadImages() {
+        try {
+          const imagePromises = this.image_urls.map(async (image) => {
+            // 直接使用完整的 URL
+            const imageResponse = await this.$axios.get(image.url, { responseType: 'blob' });
+            return {
+              url: image.url,
+              data: imageResponse.data,
+            };
+          });
+          this.images = await Promise.all(imagePromises);
+        } catch (error) {
+          console.error('Error loading images:', error);
+        }
+      },
+        getImageUrl(imageUrl) {
+          return imageUrl; // 直接返回从后端获取的图片 URL
+        },
         async likePost() {
             try {
                 const postId = this.$route.params.id;
@@ -155,6 +213,10 @@
                 alert('Error submitting comment');
             }
         },
+        openImageDialog(imageUrl) {
+          this.selectedImage = imageUrl;
+          this.dialog = true;
+        },
     },
   };
   </script>
@@ -188,52 +250,86 @@
     font-weight: bold;
   }
   </style>
-  <style scoped>
-  .post-detail {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-  }
-  
-  .post-title {
-    font-size: 2em;
-    margin-bottom: 0.5em;
-  }
-  
-  .post-text {
-    font-size: 1.2em;
-    margin-bottom: 1em;
-  }
-  
-  .post-meta {
-    font-size: 0.9em;
-    color: #555;
-  }
-  
-  .post-meta strong {
-    font-weight: bold;
-  }
-  
-  .comments-section {
-    margin-top: 20px;
-  }
-  
-  .comments-section table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .comments-section th, .comments-section td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  .comments-section th {
-    background-color: #f2f2f2;
-  }
-  </style>
-  
+
+<style scoped>
+.post-detail {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.post-title {
+  font-size: 2em;
+  margin-bottom: 0.5em;
+}
+
+.post-text {
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}
+
+.post-meta {
+  font-size: 0.9em;
+  color: #555;
+}
+
+.post-meta strong {
+  font-weight: bold;
+}
+
+.comments-section {
+  margin-top: 20px;
+}
+
+.comments-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.comments-section th, .comments-section td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.comments-section th {
+  background-color: #f2f2f2;
+}
+
+.images-section {
+  margin-top: 20px;
+}
+
+.images-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.post-image {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.post-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.like-section {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.like-section v-btn {
+  margin-right: 10px;
+}
+</style>
