@@ -17,4 +17,6 @@ public interface PostService {
     List<Post> getAllPost(Integer uid); //帖子列表
     Optional<Post> getPostById(Integer pid);
     List<Post> getAllofPost();
+    boolean uploadImageService(Integer pid, String url);
+    List<String> getImagesService(Integer pid);
 }

@@ -12,7 +12,14 @@ import org.hit.hitcommunitybackend.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.List;
 
@@ -42,8 +49,7 @@ public class PostController {
         Integer uid = user.getUid();
         Post p = postService.postPublishService(uid,post);
         Result<Post> result = new Result<>();
-        result.setData(p);
-        result.setResultSuccess("Post created successfully, Post pid: " + post.getPid());
+        result.setResultSuccess("Post created successfully, Post pid: " + post.getPid(), p);
         return result;
     }
 
@@ -173,5 +179,59 @@ public class PostController {
         result.setData(res);
         return result;
     }
-    
+
+    // 上传文件保存路径
+    private static String IMAGES_FOLDER = "D:\\code\\projects\\idea\\HITCommunityBackend\\src\\main\\resources\\static\\";
+
+    // 获取文件扩展名的辅助方法
+    private String getFileExtension(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return "";
+        }
+        int dotIndex = fileName.lastIndexOf('.');
+        return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
+    }
+
+    @PostMapping("/images/upload")
+    public Result<Void> uploadImage(@RequestParam("file") MultipartFile file,
+                                    @RequestParam("pid") int pid,
+                                    HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        // 检查文件是否为空
+        if (file.isEmpty()) {
+            // 可以根据需要抛出异常或返回错误响应
+            Result<Void> result = new Result<>();
+            result.setResultFailed("文件为空");
+            return result;
+        }
+        try {
+            // 获取文件字节
+            byte[] bytes = file.getBytes();
+            // 定义文件保存路径
+            // 获取当前时间并格式化
+            String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            // 构建新的文件名
+            String newFileName = uid + "_" + pid + "_" + time;
+            // 获取文件扩展名
+            String fileExtension = getFileExtension(file.getOriginalFilename());
+            // 完整文件路径
+            String pathString = IMAGES_FOLDER + newFileName + "." + fileExtension;
+            Path path = Paths.get(pathString);
+            // 将文件写入指定路径
+            Files.write(path, bytes);
+            postService.uploadImageService(pid, pathString);
+            // 可以根据需要返回成功响应
+            System.out.println("文件上传成功：" + path.toString());
+            Result<Void> result = new Result<>();
+            result.setResultSuccess("Image uploaded successfully");
+            return result;
+        } catch (IOException e) {
+            // 可以根据需要抛出异常或返回错误响应
+            Result<Void> result = new Result<>();
+            result.setResultFailed("文件上传失败");
+            return result;
+        }
+    }
+
 }

@@ -6,9 +6,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 @Entity
 @Table(name = "images")
@@ -18,9 +15,8 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer iid;
 
-    @ManyToOne
-    @JoinColumn(name = "pid", nullable = false, foreignKey = @ForeignKey(name = "FK_IMAGES_POSTS"))
-    private Post post;
+    @Column(name = "pid", nullable = false)
+    private Integer pid;
 
     @Column(name = "iurl", nullable = false, length = 255)
     private String iurl;
@@ -30,8 +26,8 @@ public class Image {
     }
 
     // Constructor with parameters
-    public Image(Post post, String iurl) {
-        this.post = post;
+    public Image(Integer pid, String iurl) {
+        this.pid = pid;
         this.iurl = iurl;
     }
 
@@ -45,12 +41,12 @@ public class Image {
         this.iid = iid;
     }
 
-    public Post getPost() {
-        return post;
+    public Integer getPid() {
+        return pid;
     }
 
-    public void setPost(Post post) {
-        this.post = post;
+    public void setPid(Integer pid) {
+        this.pid = pid;
     }
 
     public String getIurl() {
@@ -65,9 +61,8 @@ public class Image {
     public String toString() {
         return "Image{" +
                 "iid=" + iid +
-                ", post=" + post +
+                ", pid=" + pid +
                 ", iurl='" + iurl + '\'' +
                 '}';
     }
 }
-

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -27,6 +28,8 @@ public class PostServiceImpl implements PostService {
     private CommentDao commentDao;
     @Autowired
     private RepostDao repostDao;
+    @Autowired
+    private ImageDao imageDao;
 
     @Override
     public Post postPublishService(Integer uid, Post post) {
@@ -170,5 +173,29 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<Post> getAllofPost(){
       return postDao.findAll();
+    }
+
+    @Override
+    public boolean uploadImageService(Integer pid, String url) {
+        try {
+            // 创建新的 Image 实体
+            Image image = new Image(pid, url);
+            // 保存 Image 实体到数据库
+            imageDao.save(image);
+            return true; // 成功保存，返回 true
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false; // 保存失败，返回 false
+        }
+    }
+
+    @Override
+    public List<String> getImagesService(Integer pid) {
+        // 使用 ImageDao 查找所有关联的 Image 实体
+        List<Image> images = imageDao.findByPid(pid);
+        // 提取每个 Image 实体的 iurl 字段并返回
+        return images.stream()
+                .map(Image::getIurl)
+                .collect(Collectors.toList());
     }
 }
