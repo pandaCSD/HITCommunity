@@ -138,6 +138,7 @@ export default {
         urls.data.data.forEach(url => {
           this.image_urls.push({ url: url.iurl });
         });
+        console.log(this.image_urls);
         await this.loadImages(); // 调用方法加载图片
       } else {
         console.error('Error fetching likes:', urls.data);
