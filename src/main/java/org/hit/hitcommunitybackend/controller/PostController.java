@@ -12,7 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hit.hitcommunitybackend.model.ErrorCode.*;
 
@@ -182,8 +186,7 @@ public class PostController {
     }
 
     // 上传文件保存路径
-    private static String IMAGES_FOLDER = "/static/images/";
-    private static String UpLoad_Image_FOLDER = "src/main/resources/static/images/";
+    private static String IMAGES_FOLDER = "C:\\Users\\panda\\Pictures\\IMAGE\\";
 
     // 获取文件扩展名的辅助方法
     private String getFileExtension(String fileName) {
@@ -193,7 +196,7 @@ public class PostController {
         int dotIndex = fileName.lastIndexOf('.');
         return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
     }
-    private Integer ImageNumber = 0;
+
     @PostMapping("/images/upload")
     public Result<Void> uploadImage(@RequestParam("file") MultipartFile file,
                                     @RequestParam("pid") int pid,
@@ -213,21 +216,22 @@ public class PostController {
             // 定义文件保存路径
             // 获取当前时间并格式化
             String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            // 生成唯一的UUID
+            String uuid = UUID.randomUUID().toString();
             // 构建新的文件名
-            String newFileName = uid + "_" + pid + "_" + time;
+            String newFileName = uid + "_" + pid + "_" + time + "_" + uuid;
             // 获取文件扩展名
             String fileExtension = getFileExtension(file.getOriginalFilename());
             // 完整文件路径
-            String pathString = UpLoad_Image_FOLDER + newFileName + ImageNumber.toString()  + "." + fileExtension;
-            String updateDB_url = baseURL + IMAGES_FOLDER + newFileName+ ImageNumber.toString() + "." + fileExtension;
-            ImageNumber+=1;
+            String halfPath = newFileName + "." + fileExtension;
+            String pathString = IMAGES_FOLDER + halfPath;
             Path path = Paths.get(pathString);
             // 将文件写入指定路径
             Files.write(path, bytes);
             // 存入数据库的路径进行修改
-            postService.uploadImageService(pid, updateDB_url);
+            postService.uploadImageService(pid, halfPath);
             // 可以根据需要返回成功响应
-            System.out.println("文件上传成功：" + path.toString());
+            System.out.println("文件上传成功：" + path);
             Result<Void> result = new Result<>();
             result.setResultSuccess("Image uploaded successfully");
             return result;
@@ -239,12 +243,11 @@ public class PostController {
         }
     }
     // get urls
-    @GetMapping("/images/get/{pid}")
-    public Result<List<Image>> getAllImages(@PathVariable Integer pid,HttpServletRequest request) {
+    @GetMapping("/images/find/{pid}")
+    public Result<List<Image>> findImages(@PathVariable Integer pid,HttpServletRequest request) {
         List<Image> ret = imageDao.findByPid(pid);
         Result<List<Image>> result = new Result<>();
-        result.setResultSuccess("All images found Here!!");
-        result.setData(ret);
+        result.setResultSuccess("All images found Here!!", ret);
         return result;
     }
 
