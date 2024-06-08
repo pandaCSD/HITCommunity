@@ -166,4 +166,9 @@ public class PostServiceImpl implements PostService {
             return Optional.empty();
         }
     }
+    
+    @Override
+    public List<Post> getAllofPost(){
+      return postDao.findAll();
+    }
 }

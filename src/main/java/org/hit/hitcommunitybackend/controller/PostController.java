@@ -6,6 +6,8 @@ import org.hit.hitcommunitybackend.domain.Post;
 import org.hit.hitcommunitybackend.domain.Repost;
 import org.hit.hitcommunitybackend.domain.User;
 import org.hit.hitcommunitybackend.model.Result;
+import org.hit.hitcommunitybackend.repository.CommentDao;
+import org.hit.hitcommunitybackend.repository.LikeDao;
 import org.hit.hitcommunitybackend.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +25,13 @@ public class PostController {
     private final PostService postService;
 
     public static final String SESSION_NAME = "user";
-
-    public PostController(PostService postService) {
+    private final CommentDao commentDao;
+    private final LikeDao likeDao;
+    
+    public PostController(PostService postService, CommentDao commentDao, LikeDao likeDao) {
         this.postService = postService;
+        this.commentDao = commentDao;
+        this.likeDao = likeDao;
     }
     // private final UserDao userDao;
 
@@ -63,13 +69,13 @@ public class PostController {
         Result<Post> result = new Result<>();
         if (opost.isPresent()){
             Post p = opost.get();
-            result.setData(p);
             result.setResultSuccess("Post who's id:"+pid+" found");
+            result.setData(p);
         }
         return result;
     }
 
-    // 这需要传入一个uid和一个pid喜欢帖子
+    // 这需要传入一个pid喜欢帖子
     @PostMapping("/like/{pid}")
     public Result<Integer> likePost(@PathVariable Integer pid, HttpServletRequest request){
         User user = (User) request.getSession().getAttribute(SESSION_NAME);
@@ -79,8 +85,8 @@ public class PostController {
         Integer lid = postService.postLikeService(uid,pid);
 
         if (lid != null){
-            result.setData(lid);
             result.setResultSuccess("Post like successfully");
+            result.setData(lid);
         }else{
             result.setResultFailedWithErrorCode("User Not Found Or Post not found!!",ErrLikeNotFound);
         }
@@ -96,8 +102,8 @@ public class PostController {
         Result<Integer> result = new Result<>();
         Integer lid = postService.postCommentService(uid,pid,comment);
         if (lid != null){
-            result.setData(lid);
             result.setResultSuccess("Comment successfully");
+            result.setData(lid);
         }else {
             result.setResultFailedWithErrorCode("User Not Found Or Post not found!!",ErrCommentFound);
         }
@@ -128,9 +134,44 @@ public class PostController {
 
         List<Post> res = postService.getAllPost(uid);
         Result<List<Post>> result = new Result<>();
-        result.setData(res);
         result.setResultSuccess("All posts who's uid is satisfied found Here!!");
+        result.setData(res);
         return result;
     }
-
+    
+    // 根据uid获取所有post
+    @GetMapping("/allposts")
+    public Result<List<Post>> getallPosts(HttpServletRequest request) {
+        List<Post> res = postService.getAllofPost();
+        // 调试输出以确认是否获取到了数据
+        if (res == null || res.isEmpty()) {
+            System.out.println("No posts found");
+        } else {
+            System.out.println("Posts found: " + res.size());
+        }
+        
+        Result<List<Post>> result = new Result<>();
+        result.setResultSuccess("All posts who's uid is satisfied found Here!!");
+        result.setData(res);
+        return result;
+    }
+    
+    @GetMapping("/comments/{pid}")
+    public Result<List<Comment>> getCommentsById(@PathVariable Integer pid, HttpServletRequest request) {
+        List<Comment>comments = commentDao.findByPostId(pid);
+        Result<List<Comment>> result = new Result<>();
+        result.setResultSuccess("All comments who's pid is satisfied found Here!!");
+        result.setData(comments);
+        return result;
+    }
+    
+    @GetMapping("/likes/{pid}")
+    public Result<Integer> getPostLikes(@PathVariable Integer pid, HttpServletRequest request) {
+        Integer res = likeDao.findByPostId(pid);
+        Result<Integer> result = new Result<>();
+        result.setResultSuccess("All likes count by pid found Here!!");
+        result.setData(res);
+        return result;
+    }
+    
 }
