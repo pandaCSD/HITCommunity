@@ -9,6 +9,7 @@ import org.hit.hitcommunitybackend.repository.LikeDao;
 import org.hit.hitcommunitybackend.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -186,7 +187,7 @@ public class PostController {
     }
 
     // 上传文件保存路径
-    private static String IMAGES_FOLDER = "C:\\Users\\panda\\Pictures\\IMAGE\\";
+    private static String IMAGES_FOLDER = "src/main/resources/static/images/";
 
     // 获取文件扩展名的辅助方法
     private String getFileExtension(String fileName) {
