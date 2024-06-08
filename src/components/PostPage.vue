@@ -68,7 +68,7 @@ export default {
     return {
       title: '',
       text: '',
-      pid: 123, // 示例pid，可以根据需要动态设置
+      pid: -1, // 示例pid，可以根据需要动态设置
       files: [],
       filePreviews: [],
     };
@@ -84,10 +84,10 @@ export default {
       this.files = this.files.concat(newFiles);
       this.filePreviews = this.filePreviews.concat(newFilePreviews);
     },
-    async uploadImage(file) {
+    async uploadImage(file, pid) {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('pid', this.pid);
+      formData.append('pid', pid);
 
       try {
         const response = await this.$axios.post('/post/images/upload', formData, {
@@ -101,34 +101,30 @@ export default {
       }
     },
     async submitPost() {
-      const formData = new FormData();
-      formData.append('title', this.title);
-      formData.append('text', this.text);
-
-      // 上传图片
-      const uploadPromises = this.files.map(file => this.uploadImage(file));
-      
       try {
+        // 先提交post数据
+        const postResponse = await this.$axios.post('/post/post', {
+          title: this.title,
+          text: this.text
+        });
+        console.log('Post submitted successfully:', postResponse.data);
+        // 获取返回的pid
+        const pid = postResponse.data.data.pid;
+        // 上传图片
+        const uploadPromises = this.files.map(file => this.uploadImage(file, pid));
         await Promise.all(uploadPromises);
         console.log('All images uploaded successfully');
-        
-        // 这里可以继续处理其他表单数据的提交
-        await this.$axios.post('/post/post', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        
-        console.log('Post submitted successfully');
+        // 重置表单
         this.title = '';
         this.text = '';
         this.files = [];
         this.filePreviews = [];
+        alert('帖子发送成功');
       } catch (error) {
-        console.error('Error submitting post:', error);
+        console.error('Error submitting post or uploading images:', error);
       }
     }
-  }
+  } 
 }
 </script>
 

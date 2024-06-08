@@ -25,9 +25,23 @@ export default {
     };
   },
   methods: {
-    register() {
-      // 实现注册逻辑
-      console.log("Registered", this.username, this.email, this.password);
+    async register() {
+      try {
+        const response = await this.$axios.post('/user/register', {
+          uid : -1,
+          uname: this.username,
+          upassword: this.password
+        });
+        if (response.data.success) {
+          console.log('注册成功！');
+        } else {
+          console.error('注册失败：', response.data.message);
+          alert('注册失败：' + response.data.message);
+        }
+      } catch (error) {
+        console.error('Error during register:', error);
+        alert('An error occurred during register.');
+      }
       this.close();
     },
     close() {
