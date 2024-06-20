@@ -198,4 +198,10 @@ public class PostServiceImpl implements PostService {
                 .map(Image::getIurl)
                 .collect(Collectors.toList());
     }
+    
+    @Override
+    public List<Repost> getRepostByUId(Integer uid) {
+      return repostDao.findAllByRowner_Uid(uid);
+    }
+    
 }

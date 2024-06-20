@@ -3,20 +3,14 @@ package org.hit.hitcommunitybackend.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hit.hitcommunitybackend.domain.*;
 import org.hit.hitcommunitybackend.model.Result;
-import org.hit.hitcommunitybackend.repository.CommentDao;
-import org.hit.hitcommunitybackend.repository.ImageDao;
-import org.hit.hitcommunitybackend.repository.LikeDao;
+import org.hit.hitcommunitybackend.repository.*;
 import org.hit.hitcommunitybackend.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,12 +19,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hit.hitcommunitybackend.model.ErrorCode.*;
 
 @RestController
 @RequestMapping("/post")
 public class PostController {
+    private final PostDao postDao;
     private String baseURL = "http://localhost:8080";
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
     private final PostService postService;
@@ -39,12 +35,14 @@ public class PostController {
     private final CommentDao commentDao;
     private final LikeDao likeDao;
     private final ImageDao imageDao;
-    
-    public PostController(PostService postService, CommentDao commentDao, LikeDao likeDao, ImageDao imageDao) {
+    private final FriendDao friendDao;
+    public PostController(PostService postService, CommentDao commentDao, LikeDao likeDao, ImageDao imageDao, FriendDao friendDao, PostDao postDao) {
         this.postService = postService;
         this.commentDao = commentDao;
         this.likeDao = likeDao;
         this.imageDao = imageDao;
+        this.friendDao = friendDao;
+        this.postDao = postDao;
     }
     // private final UserDao userDao;
 
@@ -151,7 +149,7 @@ public class PostController {
         return result;
     }
     
-    // 根据uid获取所有post
+    // 获取所有post
     @GetMapping("/allposts")
     public Result<List<Post>> getallPosts(HttpServletRequest request) {
         List<Post> res = postService.getAllofPost();
@@ -164,6 +162,40 @@ public class PostController {
         
         Result<List<Post>> result = new Result<>();
         result.setResultSuccess("All posts who's uid is satisfied found Here!!");
+        result.setData(res);
+        return result;
+    }
+    
+    // 根据 uid 获取所有自己的帖子和好友的帖子
+    @GetMapping("/my_posts")
+    public Result<List<Post>> getMyPosts(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        List<Post> res = postService.getAllPost(uid);
+        List<User> friends = friendDao.findAllFriend(uid);
+        for (User u : friends){
+         List<Post> friendPosts = postService.getAllPost(u.getUid());
+         res.addAll(friendPosts);
+        }
+        Result<List<Post>> result = new Result<>();
+        result.setResultSuccess("All posts and friends' posts who's uid is satisfied found Here!!");
+        result.setData(res);
+        return result;
+    }
+    
+    // 根据 uid 获取自己转发的帖子和朋友转发的帖子
+    @GetMapping("/reposts")
+    public Result<List<Repost>> getMyReposts(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        List<Repost> res = postService.getRepostByUId(uid);
+        List<User> friends = friendDao.findAllFriend(uid);
+        for (User u : friends){
+            List<Repost> friendPosts = postService.getRepostByUId(u.getUid());
+            res.addAll(friendPosts);
+        }
+        Result<List<Repost>> result = new Result<>();
+        result.setResultSuccess("All reposts and friends' posts who's uid is satisfied found Here!!");
         result.setData(res);
         return result;
     }
