@@ -19,4 +19,5 @@ public interface PostService {
     List<Post> getAllofPost();
     boolean uploadImageService(Integer pid, String url);
     List<String> getImagesService(Integer pid);
+    List<Repost> getRepostByUId(Integer uid);
 }
