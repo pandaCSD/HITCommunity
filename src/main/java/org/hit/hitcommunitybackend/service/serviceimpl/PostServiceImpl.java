@@ -193,27 +193,24 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    private static String IMAGES_FOLDER = "C:\\Users\\panda\\Pictures\\IMAGE\\";
     @Override
-    public boolean deleteImageService(Integer pid) {
+    public List<String> getImagesService(Integer pid) {
+        // 使用 ImageDao 查找所有关联的 Image 实体
         List<Image> images = imageDao.findByPid(pid);
-        for (Image image : images) {
-            String pathString = IMAGES_FOLDER + image.getIurl();
-            Path path = Paths.get(pathString);
-            // 删除文件
-            try {
-                Files.delete(path);
-                imageDao.delete(image);
-            } catch (IOException e) {
-                return false;
-            }
-        }
-        return false;
+        // 提取每个 Image 实体的 iurl 字段并返回
+        return images.stream()
+                .map(Image::getIurl)
+                .collect(Collectors.toList());
     }
 
     @Override
+    public List<Repost> getRepostByUId(Integer uid) {
+      return repostDao.findAllByRowner_Uid(uid);
+    }
+
+
+    @Override
     public boolean adDeletePostService(Integer pid) {
-        deleteImageService(pid);
         commentDao.deleteCommentsByPostId(pid);
         likeDao.deleteByPostId(pid);
         repostDao.deleteByPostId(pid);

@@ -3,20 +3,15 @@ package org.hit.hitcommunitybackend.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hit.hitcommunitybackend.domain.*;
 import org.hit.hitcommunitybackend.model.Result;
-import org.hit.hitcommunitybackend.repository.CommentDao;
-import org.hit.hitcommunitybackend.repository.ImageDao;
-import org.hit.hitcommunitybackend.repository.LikeDao;
+import org.hit.hitcommunitybackend.repository.*;
 import org.hit.hitcommunitybackend.service.PostService;
 import org.hit.hitcommunitybackend.utility.COSUtility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,21 +23,23 @@ import static org.hit.hitcommunitybackend.model.ErrorCode.*;
 @RestController
 @RequestMapping("/post")
 public class PostController {
-    private static final Logger log = LoggerFactory.getLogger(PostController.class);
     private final PostService postService;
-
     public static final String SESSION_NAME = "user";
+    private final PostDao postDao;
     private final CommentDao commentDao;
     private final LikeDao likeDao;
     private final ImageDao imageDao;
     private final COSUtility cosUtility;
+    private final FriendDao friendDao;
 
-    public PostController(PostService postService, CommentDao commentDao, LikeDao likeDao, ImageDao imageDao, COSUtility cosUtility) {
+    public PostController(PostService postService, CommentDao commentDao, LikeDao likeDao, ImageDao imageDao, FriendDao friendDao, PostDao postDao, COSUtility cosUtility) {
         this.postService = postService;
         this.commentDao = commentDao;
         this.likeDao = likeDao;
         this.imageDao = imageDao;
         this.cosUtility = cosUtility;
+        this.friendDao = friendDao;
+        this.postDao = postDao;
     }
     // private final UserDao userDao;
 
@@ -149,7 +146,7 @@ public class PostController {
         return result;
     }
     
-    // 根据uid获取所有post
+    // 获取所有post
     @GetMapping("/allposts")
     public Result<List<Post>> getallPosts(HttpServletRequest request) {
         List<Post> res = postService.getAllofPost();
@@ -165,7 +162,41 @@ public class PostController {
         result.setData(res);
         return result;
     }
-    
+
+    // 根据 uid 获取所有自己的帖子和好友的帖子
+    @GetMapping("/my_posts")
+    public Result<List<Post>> getMyPosts(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        List<Post> res = postService.getAllPost(uid);
+        List<User> friends = friendDao.findAllFriend(uid);
+        for (User u : friends){
+         List<Post> friendPosts = postService.getAllPost(u.getUid());
+         res.addAll(friendPosts);
+        }
+        Result<List<Post>> result = new Result<>();
+        result.setResultSuccess("All posts and friends' posts who's uid is satisfied found Here!!");
+        result.setData(res);
+        return result;
+    }
+
+    // 根据 uid 获取自己转发的帖子和朋友转发的帖子
+    @GetMapping("/reposts")
+    public Result<List<Repost>> getMyReposts(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        List<Repost> res = postService.getRepostByUId(uid);
+        List<User> friends = friendDao.findAllFriend(uid);
+        for (User u : friends){
+            List<Repost> friendPosts = postService.getRepostByUId(u.getUid());
+            res.addAll(friendPosts);
+        }
+        Result<List<Repost>> result = new Result<>();
+        result.setResultSuccess("All reposts and friends' posts who's uid is satisfied found Here!!");
+        result.setData(res);
+        return result;
+    }
+
     @GetMapping("/comments/{pid}")
     public Result<List<Comment>> getCommentsById(@PathVariable Integer pid, HttpServletRequest request) {
         List<Comment>comments = commentDao.findByPostId(pid);
@@ -222,6 +253,7 @@ public class PostController {
             return result;
         }
     }
+
     // get urls
     @GetMapping("/images/find/{pid}")
     public Result<List<Image>> findImages(@PathVariable Integer pid,HttpServletRequest request) {
