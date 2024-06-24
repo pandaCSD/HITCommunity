@@ -2,10 +2,10 @@ package org.hit.hitcommunitybackend.service.serviceimpl;
 
 import jakarta.annotation.Resource;
 import org.hit.hitcommunitybackend.domain.*;
-import org.hit.hitcommunitybackend.repository.FriendDao;
-import org.hit.hitcommunitybackend.repository.RequestDao;
-import org.hit.hitcommunitybackend.repository.UserDao;
+import org.hit.hitcommunitybackend.repository.*;
+import org.hit.hitcommunitybackend.service.PostService;
 import org.hit.hitcommunitybackend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +16,13 @@ public class UserServiceImpl implements UserService {
     @Resource private UserDao userDao;
     @Resource private FriendDao friendDao;
     @Resource private RequestDao requestDao;
+    @Resource private UserInfoDao userInfoDao;
+    @Autowired
+    private LikeDao likeDao;
+    @Autowired
+    private CommentDao commentDao;
+    @Autowired
+    private RepostDao repostDao;
 
     @Override
     public User userRegisterService(String uname, String upassword) {
@@ -70,13 +77,23 @@ public class UserServiceImpl implements UserService {
     public boolean userDeleteService(Integer uid) {
         // 判断用户是否存在
         if (userDao.existsById(uid)) {
-            // 存在则删除用户
             userDao.deleteById(uid);
             return true;
         } else {
             // 不存在则返回 false
             return false;
         }
+    }
+
+    @Override
+    public void adDeleteUserService(Integer uid) {
+        // 存在则删除用户
+        likeDao.deleteByUserId(uid);
+        commentDao.deleteCommentsByUserId(uid);
+        requestDao.deleteRequestByUserID(uid);
+        friendDao.deleteFriendByUserID(uid);
+        requestDao.deleteRequestByUserID(uid);
+        repostDao.deleteByUserId(uid);
     }
 
     @Override
@@ -146,5 +163,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public User userFindByUidService(Integer uid) {
         return userDao.findByUid(uid);
+    }
+
+    @Override
+    public UserInfo userGetInfoService(Integer uid){
+        return userInfoDao.findByUid(uid);
+    }
+
+
+    @Override
+    public List<User> getAllUserService() {
+        return userDao.findAll();
+    }
+
+    @Override
+    public UserInfo userUpdateInfoService(UserInfo userInfo) {
+        return userInfoDao.save(userInfo);
     }
 }

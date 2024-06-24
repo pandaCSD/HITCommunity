@@ -9,6 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -189,13 +193,33 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    private static String IMAGES_FOLDER = "C:\\Users\\panda\\Pictures\\IMAGE\\";
     @Override
-    public List<String> getImagesService(Integer pid) {
-        // 使用 ImageDao 查找所有关联的 Image 实体
+    public boolean deleteImageService(Integer pid) {
         List<Image> images = imageDao.findByPid(pid);
-        // 提取每个 Image 实体的 iurl 字段并返回
-        return images.stream()
-                .map(Image::getIurl)
-                .collect(Collectors.toList());
+        for (Image image : images) {
+            String pathString = IMAGES_FOLDER + image.getIurl();
+            Path path = Paths.get(pathString);
+            // 删除文件
+            try {
+                Files.delete(path);
+                imageDao.delete(image);
+            } catch (IOException e) {
+                return false;
+            }
+        }
+        return false;
     }
+
+    @Override
+    public boolean adDeletePostService(Integer pid) {
+        deleteImageService(pid);
+        commentDao.deleteCommentsByPostId(pid);
+        likeDao.deleteByPostId(pid);
+        repostDao.deleteByPostId(pid);
+        postDao.deleteById(pid);
+        return true;
+    }
+
+
 }

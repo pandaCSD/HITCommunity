@@ -18,5 +18,6 @@ public interface PostService {
     Optional<Post> getPostById(Integer pid);
     List<Post> getAllofPost();
     boolean uploadImageService(Integer pid, String url);
-    List<String> getImagesService(Integer pid);
+    boolean deleteImageService(Integer pid);
+    boolean adDeletePostService(Integer pid);
 }

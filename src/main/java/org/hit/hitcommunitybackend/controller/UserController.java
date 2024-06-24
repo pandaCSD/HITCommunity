@@ -3,23 +3,34 @@ package org.hit.hitcommunitybackend.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.hit.hitcommunitybackend.domain.User;
+import org.hit.hitcommunitybackend.domain.UserInfo;
 import org.hit.hitcommunitybackend.model.Result;
 import org.hit.hitcommunitybackend.service.UserService;
+import org.hit.hitcommunitybackend.utility.COSUtility;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5599")
 @RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
+    private final COSUtility cosUtility;
+
     public static final String SESSION_NAME = "user";
 
-    public UserController(UserService userService) {
+
+    public UserController(UserService userService, COSUtility cosUtility) {
         this.userService = userService;
+        this.cosUtility = cosUtility;
     }
 
     @PostMapping("/register")
@@ -223,6 +234,131 @@ public class UserController {
             result.setResultSuccess("查询朋友成功", user);
         } else {
             result.setResultFailed("用户不存在");
+        }
+        return result;
+    }
+
+    @GetMapping("/avatar/{uid}")
+    public ResponseEntity<byte[]> getUserAvatar(@PathVariable Integer uid) {
+        try {
+            String url = "/avatars/" + uid + ".jpg";
+            byte[] bytes = cosUtility.getData(url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_JPEG); // 设置内容类型为JPEG图像
+            return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            // 内部服务器错误，可以记录错误详情
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/background/{uid}")
+    public ResponseEntity<byte[]> getUserBackground(@PathVariable Integer uid) {
+        try {
+            String url = "/backgrounds/" + uid + ".jpg";
+            byte[] bytes = cosUtility.getData(url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_JPEG); // 设置内容类型为JPEG图像
+            return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            // 内部服务器错误，可以记录错误详情
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    private UserInfo completeUserInfo(UserInfo info) {
+        if(info == null) {
+            info = new UserInfo();
+        }
+        if(info.getAge() == null) {
+            info.setAge(0);
+        }
+        if(info.getGender() == null) {
+            info.setGender(UserInfo.Gender.Male);
+        }
+        if(info.getEmail() == null) {
+            info.setEmail("###");
+        }
+        if(info.getPhone() == null) {
+            info.setPhone("###");
+        }
+        if(info.getSignature() == null) {
+            info.setSignature("###");
+        }
+        return info;
+    }
+
+    @GetMapping("/userinfo/{uid}")
+    public Result<UserInfo> getUserInfo(@PathVariable Integer uid) {
+        Result<UserInfo> result = new Result<>();
+        UserInfo info = userService.userGetInfoService(uid);
+        info = completeUserInfo(info);
+        result.setResultSuccess("获取用户信息成功", info);
+        return result;
+    }
+
+    @PutMapping("/background")
+    public Result<Void> updateUserBackground(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request
+    ) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        Result<Void> result = new Result<>();
+        // 检查文件是否为空
+        if (file.isEmpty()) {
+            // 可以根据需要抛出异常或返回错误响应
+            result.setResultFailed("文件为空");
+            return result;
+        }
+        try {
+            byte[] bytes = file.getBytes();
+            cosUtility.putData("/backgrounds/"+uid+".jpg", bytes);
+            result.setResultSuccess("上传背景成功");
+        } catch (IOException e) {
+            result.setResultFailed("上传背景失败");
+        }
+        return result;
+    }
+
+    @PutMapping("/avatar")
+    public Result<Void> updateUserAvatar(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request
+    ) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        Result<Void> result = new Result<>();
+        // 检查文件是否为空
+        if (file.isEmpty()) {
+            // 可以根据需要抛出异常或返回错误响应
+            result.setResultFailed("文件为空");
+            return result;
+        }
+        try {
+            byte[] bytes = file.getBytes();
+            cosUtility.putData("/avatars/"+uid+".jpg", bytes);
+            result.setResultSuccess("上传头像成功");
+        } catch (IOException e) {
+            result.setResultFailed("上传头像失败");
+        }
+        return result;
+    }
+
+    @PutMapping("/userinfo")
+    public Result<UserInfo> updateUserInfo(
+            @RequestBody UserInfo userInfo,
+            HttpServletRequest request
+    ) {
+        Result<UserInfo> result = new Result<>();
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        userInfo.setUid(uid);
+        UserInfo r = userService.userUpdateInfoService(userInfo);
+        if(r != null) {
+            result.setResultSuccess("更新用户信息成功", r);
+        } else {
+            result.setResultFailed("更新用户信息失败");
         }
         return result;
     }

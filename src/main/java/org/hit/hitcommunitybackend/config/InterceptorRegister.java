@@ -13,7 +13,6 @@ import java.util.List;
  */
 @Configuration
 public class InterceptorRegister implements WebMvcConfigurer {
-
     /**
      * 把定义的拦截器类注册为Bean
      */
@@ -31,6 +30,8 @@ public class InterceptorRegister implements WebMvcConfigurer {
         pathPatterns.add("/user/login");
         pathPatterns.add("/user/register");
         pathPatterns.add("/user/is-login");
+        pathPatterns.add("/admin/login");
+        pathPatterns.add("/admin/is-login");
         registry.addInterceptor(getInterceptor()).excludePathPatterns(pathPatterns);
     }
 }

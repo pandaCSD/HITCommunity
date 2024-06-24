@@ -2,6 +2,7 @@ package org.hit.hitcommunitybackend.service;
 
 import org.hit.hitcommunitybackend.domain.Request;
 import org.hit.hitcommunitybackend.domain.User;
+import org.hit.hitcommunitybackend.domain.UserInfo;
 
 import java.util.List;
 
@@ -19,4 +20,10 @@ public interface UserService {
     List<User> getAllFriendRequestService(Integer uid);
     User userFindByUnameService(String uname);
     User userFindByUidService(Integer uid);
+
+    UserInfo userGetInfoService(Integer uid);
+    UserInfo userUpdateInfoService(UserInfo userInfo);
+
+    List<User> getAllUserService();
+    void adDeleteUserService(Integer uid);
 }

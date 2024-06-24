@@ -7,31 +7,27 @@ import org.hit.hitcommunitybackend.repository.CommentDao;
 import org.hit.hitcommunitybackend.repository.ImageDao;
 import org.hit.hitcommunitybackend.repository.LikeDao;
 import org.hit.hitcommunitybackend.service.PostService;
+import org.hit.hitcommunitybackend.utility.COSUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.List;
 import java.util.UUID;
-
 import static org.hit.hitcommunitybackend.model.ErrorCode.*;
 
 @RestController
 @RequestMapping("/post")
 public class PostController {
-    private String baseURL = "http://localhost:8080";
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
     private final PostService postService;
 
@@ -39,12 +35,14 @@ public class PostController {
     private final CommentDao commentDao;
     private final LikeDao likeDao;
     private final ImageDao imageDao;
-    
-    public PostController(PostService postService, CommentDao commentDao, LikeDao likeDao, ImageDao imageDao) {
+    private final COSUtility cosUtility;
+
+    public PostController(PostService postService, CommentDao commentDao, LikeDao likeDao, ImageDao imageDao, COSUtility cosUtility) {
         this.postService = postService;
         this.commentDao = commentDao;
         this.likeDao = likeDao;
         this.imageDao = imageDao;
+        this.cosUtility = cosUtility;
     }
     // private final UserDao userDao;
 
@@ -186,18 +184,6 @@ public class PostController {
         return result;
     }
 
-    // 上传文件保存路径
-    private static String IMAGES_FOLDER = "src/main/resources/static/images/";
-
-    // 获取文件扩展名的辅助方法
-    private String getFileExtension(String fileName) {
-        if (fileName == null || fileName.isEmpty()) {
-            return "";
-        }
-        int dotIndex = fileName.lastIndexOf('.');
-        return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
-    }
-
     @PostMapping("/images/upload")
     public Result<Void> uploadImage(@RequestParam("file") MultipartFile file,
                                     @RequestParam("pid") int pid,
@@ -221,25 +207,18 @@ public class PostController {
             String uuid = UUID.randomUUID().toString();
             // 构建新的文件名
             String newFileName = uid + "_" + pid + "_" + time + "_" + uuid;
-            // 获取文件扩展名
-            String fileExtension = getFileExtension(file.getOriginalFilename());
-            // 完整文件路径
-            String halfPath = newFileName + "." + fileExtension;
-            String pathString = IMAGES_FOLDER + halfPath;
-            Path path = Paths.get(pathString);
-            // 将文件写入指定路径
-            Files.write(path, bytes);
+            // 完整文件名
+            String halfPath = newFileName + ".jpg";
+            cosUtility.putData("/post_images/"+halfPath, bytes);
             // 存入数据库的路径进行修改
             postService.uploadImageService(pid, halfPath);
-            // 可以根据需要返回成功响应
-            System.out.println("文件上传成功：" + path);
             Result<Void> result = new Result<>();
-            result.setResultSuccess("Image uploaded successfully");
+            result.setResultSuccess("图片上传成功");
             return result;
         } catch (IOException e) {
             // 可以根据需要抛出异常或返回错误响应
             Result<Void> result = new Result<>();
-            result.setResultFailed("文件上传失败");
+            result.setResultFailed("图片上传失败");
             return result;
         }
     }
@@ -250,6 +229,20 @@ public class PostController {
         Result<List<Image>> result = new Result<>();
         result.setResultSuccess("All images found Here!!", ret);
         return result;
+    }
+
+    @GetMapping("/images/get/{url}")
+    public ResponseEntity<byte[]> getImage(@PathVariable String url) {
+        try {
+            String path = "/post_images/" + url;
+            byte[] bytes = cosUtility.getData(path);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_JPEG); // 设置内容类型为JPEG图像
+            return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            // 内部服务器错误，可以记录错误详情
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
 }
