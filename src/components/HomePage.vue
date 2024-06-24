@@ -52,7 +52,7 @@ import FriendRequestPage from '@/components/FriendRequestPage.vue'
 import FriendFindPage from '@/components/FriendFindPage.vue'
 import PostPage from '@/components/PostPage.vue'
 import PostsPage from '@/components/PostsPage.vue'
-
+import UserProfile from '@/components/UserProfile.vue';
 
 export default {
   name: 'MainPage',
@@ -64,6 +64,7 @@ export default {
     FriendFindPage,
     PostPage,
     PostsPage,
+    UserProfile,
   },
   data() {
     return {
@@ -71,7 +72,14 @@ export default {
       currentComponent: WelcomePage, // 当前显示的组件
       menuItems: [
         { title: '欢迎', component: 'WelcomePage'},
-        { title: '用户', component: 'UserPage' },
+        {
+          title: '我的',
+          icon: 'mdi-folder',
+          children: [
+            { title: '我的账户', component: 'UserPage'},
+            { title: '我的名片', component: 'UserProfile'},
+          ]
+        },
         // 这里可以添加更多的菜单项
         {
           title: '朋友',

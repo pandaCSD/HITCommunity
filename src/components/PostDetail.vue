@@ -151,19 +151,16 @@ export default {
       try {
         const imagePromises = this.image_urls.map(async (image) => {
           const imageUrl = `${image.url}`;
-          const imageResponse = await this.$axios.get(imageUrl, { responseType: 'blob' });
+          const imageResponse = await this.$downloadImage('post/images/get/'+imageUrl);
           return {
             url: imageUrl,
-            data: URL.createObjectURL(imageResponse.data), // 将blob转换为可用的URL
+            data: URL.createObjectURL(imageResponse), // 将blob转换为可用的URL
           };
         });
         this.images = await Promise.all(imagePromises);
       } catch (error) {
         console.error('Error loading images:', error);
       }
-    },
-    getImageUrl(imageUrl) {
-      return imageUrl; // 直接返回从后端获取的图片 URL
     },
     async likePost() {
       try {
@@ -205,33 +202,67 @@ export default {
 <style scoped>
 .post-detail {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 20px auto;
   padding: 20px;
-  border: 1px solid #ccc;
+  background: #f9f9f9;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .post-title {
-  font-size: 2em;
-  margin-bottom: 0.5em;
+  color: #333;
+  font-size: 28px;
+  margin-bottom: 10px;
 }
 
 .post-text {
-  font-size: 1.2em;
-  margin-bottom: 1em;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #666;
+}
+
+.images-section {
+  margin-top: 20px;
+}
+
+.images-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.post-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
+
+.post-image:hover {
+  transform: scale(1.1);
 }
 
 .post-meta {
-  font-size: 0.9em;
-  color: #555;
+  font-size: 14px;
+  color: #777;
+  margin-top: 10px;
 }
 
-.post-meta strong {
-  font-weight: bold;
+.like-section {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
 }
 
-.comments-section {
+.like-section p {
+  margin-left: 10px;
+  color: #444;
+}
+
+.comments-section,
+.add-comment-section {
   margin-top: 20px;
 }
 
@@ -240,47 +271,28 @@ export default {
   border-collapse: collapse;
 }
 
-.comments-section th, .comments-section td {
+.comments-section th,
+.comments-section td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
 }
 
 .comments-section th {
-  background-color: #f2f2f2;
+  background-color: #f0f0f0;
 }
 
-.images-section {
-  margin-top: 20px;
+.add-comment-section h3 {
+  margin-bottom: 10px;
 }
 
-.images-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-}
-
-.post-image {
-  width: 100%;
-  max-width: 200px;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.post-image:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.like-section {
+.v-dialog {
   display: flex;
+  justify-content: center;
   align-items: center;
-  margin-top: 20px;
 }
 
-.like-section v-btn {
-  margin-right: 10px;
+.v-img {
+  border-radius: 8px;
 }
 </style>

@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12">
         <v-text-field
-          label="Title"
+          label="标题"
           outlined
           v-model="title"
           class="mb-4 styled-input"
@@ -13,7 +13,7 @@
     <v-row>
       <v-col cols="12">
         <v-text-field
-          label="Text"
+          label="文本"
           outlined
           v-model="text"
           class="mb-4 styled-input"
@@ -41,7 +41,7 @@
         <v-file-input
           multiple
           small-chips
-          label="Add Images"
+          label="添加图片"
           prepend-icon="mdi-camera"
           @change="previewFiles"
           class="file-input"
@@ -55,7 +55,7 @@
           @click="submitPost"
           class="post-btn"
         >
-          Post
+          发布
         </v-btn>
       </v-col>
     </v-row>
@@ -88,7 +88,6 @@ export default {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('pid', pid);
-
       try {
         const response = await this.$axios.post('/post/images/upload', formData, {
           headers: {
@@ -119,7 +118,7 @@ export default {
         this.text = '';
         this.files = [];
         this.filePreviews = [];
-        alert('帖子发送成功');
+        alert('发布成功');
       } catch (error) {
         console.error('Error submitting post or uploading images:', error);
       }
