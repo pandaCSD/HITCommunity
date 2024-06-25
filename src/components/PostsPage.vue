@@ -64,7 +64,7 @@
 export default {
   async mounted(){
     try {
-      const response = await this.$axios.get('/post/allposts');
+      const response = await this.$axios.get('/post/my_posts');
       
       // 确认请求成功，并打印完整的响应数据
       console.log('get posts successful:', response.data);
@@ -89,6 +89,17 @@ export default {
       } else {
         console.error('Unexpected response format:', response.data);
       }
+
+      const repost_response = await this.$axios.get('/post/reposts');
+      // 确认请求成功，并打印完整的响应数据
+      console.log('get posts successful:', repost_response.data);
+       // 检查响应数据的格式
+       if (repost_response.data.success) {
+          // 将返回的<Name ， Post >对，注册到repost_topics中，在html中动态展示。
+       }else{
+          console.error('Unexpected response format:', repost_response.data);
+       }
+
     } catch (error) {
       console.error('getting posts error: ', error);
     }
@@ -99,6 +110,8 @@ export default {
       headers: [
       ],
       topics: [
+      ],
+      repost_topics: [
       ],
     };
   },
