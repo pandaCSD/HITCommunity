@@ -15,9 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
 import static org.hit.hitcommunitybackend.model.ErrorCode.*;
 
 @RestController
@@ -182,7 +181,7 @@ public class PostController {
 
     // 根据 uid 获取自己转发的帖子和朋友转发的帖子
     @GetMapping("/reposts")
-    public Result<List<Repost>> getMyReposts(HttpServletRequest request) {
+    public Result<Hashtable<String,Post>> getMyReposts(HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute(SESSION_NAME);
         Integer uid = user.getUid();
         List<Repost> res = postService.getRepostByUId(uid);
@@ -191,9 +190,16 @@ public class PostController {
             List<Repost> friendPosts = postService.getRepostByUId(u.getUid());
             res.addAll(friendPosts);
         }
-        Result<List<Repost>> result = new Result<>();
+        
+        Hashtable<String,Post> rres = new Hashtable<>();
+        for (Repost r : res){
+            Post oid = r.getOriginalPost();
+            String name = r.getRowner().getUname();
+            rres.put(name,oid);
+        }
+        Result<Hashtable<String,Post>> result = new Result<>();
         result.setResultSuccess("All reposts and friends' posts who's uid is satisfied found Here!!");
-        result.setData(res);
+        result.setData(rres);
         return result;
     }
 
