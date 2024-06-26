@@ -178,10 +178,29 @@ public class PostController {
         result.setData(res);
         return result;
     }
-
+    
+    public class RepostRes {
+        private String name;
+        private Post post;
+        
+        public RepostRes(String name, Post post) {
+            this.name = name;
+            this.post = post;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public Post getPost() {
+            return post;
+        }
+    }
+    
+    
     // 根据 uid 获取自己转发的帖子和朋友转发的帖子
     @GetMapping("/reposts")
-    public Result<Hashtable<String,Post>> getMyReposts(HttpServletRequest request) {
+    public Result<List<RepostRes>> getMyReposts(HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute(SESSION_NAME);
         Integer uid = user.getUid();
         List<Repost> res = postService.getRepostByUId(uid);
@@ -190,14 +209,15 @@ public class PostController {
             List<Repost> friendPosts = postService.getRepostByUId(u.getUid());
             res.addAll(friendPosts);
         }
-        
-        Hashtable<String,Post> rres = new Hashtable<>();
+        List<RepostRes> rres = new ArrayList<>();
+        // Hashtable<String,Post> rres = new Hashtable<>();
         for (Repost r : res){
             Post oid = r.getOriginalPost();
             String name = r.getRowner().getUname();
-            rres.put(name,oid);
+            RepostRes rr = new RepostRes(name,oid);
+            rres.add(rr);
         }
-        Result<Hashtable<String,Post>> result = new Result<>();
+        Result<List<RepostRes>> result = new Result<>();
         result.setResultSuccess("All reposts and friends' posts who's uid is satisfied found Here!!");
         result.setData(rres);
         return result;
