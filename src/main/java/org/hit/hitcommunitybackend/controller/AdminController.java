@@ -3,9 +3,11 @@ package org.hit.hitcommunitybackend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.hit.hitcommunitybackend.domain.Admin;
 import org.hit.hitcommunitybackend.domain.Post;
 import org.hit.hitcommunitybackend.domain.User;
 import org.hit.hitcommunitybackend.model.Result;
+import org.hit.hitcommunitybackend.service.AdminService;
 import org.hit.hitcommunitybackend.service.PostService;
 import org.hit.hitcommunitybackend.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +19,12 @@ import java.util.Objects;
 public class AdminController {
     public static final String SESSION_NAME = "admin";
 
+    private final AdminService adminService;
     private final UserService userService;
     private final PostService postService;
 
-    public AdminController(UserService userService, PostService postService) {
+    public AdminController(UserService userService, PostService postService, AdminService adminServicea) {
+        this.adminService = adminServicea;
         this.userService = userService;
         this.postService = postService;
     }
@@ -28,10 +32,11 @@ public class AdminController {
     @PostMapping("/login")
     public Result<Void> login(@RequestBody User user, HttpServletRequest request) {
         Result<Void> result = new Result<>();
-        if (Objects.equals(user.getUname(), "admin") && Objects.equals(user.getUpassword(), "123456")) {
+        Admin admin = adminService.adminLoginService(user.getUname(), user.getUpassword());
+        if (admin != null) {
             User x = new User();
-            x.setUid(-1);
-            x.setUname("admin");
+            x.setUid(admin.getAid());
+            x.setUname(admin.getAname());
             request.getSession().setAttribute(SESSION_NAME, x);
             result.setResultSuccess("登录成功");
         } else {
@@ -92,11 +97,10 @@ public class AdminController {
     @DeleteMapping("/user/{uid}")
     public Result<Void> deleteUser(@PathVariable Integer uid) {
         List<Post> posts = postService.getAllPost(uid);
-        userService.adDeleteUserService(uid);
         for(Post p : posts) {
-            postService.adDeletePostService(p.getPid());
+            postService.adminDeletePostService(p.getPid());
         }
-        userService.userDeleteService(uid);
+        userService.adminDeleteUserService(uid);
         Result<Void> result = new Result<>();
         result.setResultSuccess("删除用户成功");
         return result;
@@ -104,7 +108,7 @@ public class AdminController {
 
     @DeleteMapping("/post/{pid}")
     public Result<Void> deletePost(@PathVariable Integer pid) {
-        postService.adDeletePostService(pid);
+        postService.adminDeletePostService(pid);
         Result<Void> result = new Result<>();
         result.setResultSuccess("删除帖子成功");
         return result;

@@ -3,7 +3,6 @@ package org.hit.hitcommunitybackend.service.serviceimpl;
 import jakarta.annotation.Resource;
 import org.hit.hitcommunitybackend.domain.*;
 import org.hit.hitcommunitybackend.repository.*;
-import org.hit.hitcommunitybackend.service.PostService;
 import org.hit.hitcommunitybackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,14 +85,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void adDeleteUserService(Integer uid) {
-        // 存在则删除用户
+    public void adminDeleteUserService(Integer uid) {
         likeDao.deleteByUserId(uid);
         commentDao.deleteCommentsByUserId(uid);
         requestDao.deleteRequestByUserID(uid);
         friendDao.deleteFriendByUserID(uid);
-        requestDao.deleteRequestByUserID(uid);
         repostDao.deleteByUserId(uid);
+        userDao.deleteById(uid);
     }
 
     @Override

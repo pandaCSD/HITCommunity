@@ -25,5 +25,5 @@ public interface UserService {
     UserInfo userUpdateInfoService(UserInfo userInfo);
 
     List<User> getAllUserService();
-    void adDeleteUserService(Integer uid);
+    void adminDeleteUserService(Integer uid);
 }

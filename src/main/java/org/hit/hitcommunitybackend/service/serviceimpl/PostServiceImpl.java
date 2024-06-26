@@ -8,11 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -210,12 +205,12 @@ public class PostServiceImpl implements PostService {
 
 
     @Override
-    public boolean adDeletePostService(Integer pid) {
+    public void adminDeletePostService(Integer pid) {
         commentDao.deleteCommentsByPostId(pid);
         likeDao.deleteByPostId(pid);
         repostDao.deleteByPostId(pid);
+        imageDao.deleteByPostId(pid);
         postDao.deleteById(pid);
-        return true;
     }
 
     @Override

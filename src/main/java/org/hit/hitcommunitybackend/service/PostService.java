@@ -20,7 +20,7 @@ public interface PostService {
     boolean uploadImageService(Integer pid, String url);
     List<String> getImagesService(Integer pid);
     List<Repost> getRepostByUId(Integer uid);
-    boolean adDeletePostService(Integer pid);
 
+    void adminDeletePostService(Integer pid);
     List<Post> adminGetAllPost();
 }
