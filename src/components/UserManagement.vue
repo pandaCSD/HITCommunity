@@ -134,7 +134,7 @@ export default {
         },
         async deleteUser(user) {
             try {
-                const response = await this.$axios.delete('/admin/user/' + 0);
+                const response = await this.$axios.delete('/admin/user/' + user.uid);
                 if (response.data.success) {
                     alert('删除用户 uid:'+user.uid+' uname:'+user.uname+' 成功');
                 } else {
@@ -142,7 +142,7 @@ export default {
                 }
             } 
             catch (error) {
-                console.error('Error fetching users:', error);
+                console.error('网络错误');
             }
         },
         async resetPassword() {
@@ -159,7 +159,7 @@ export default {
                 }
             } 
             catch (error) {
-                console.error('Error fetching users:', error);
+                alert('网络错误');
             }
         }
     }

@@ -1,28 +1,45 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12">
-        <v-btn color="primary" @click="fetchFriends">刷新朋友列表</v-btn>
-        <v-list>
-          <v-list-item v-for="friend in friends" :key="friend.uid" @click="openUserCard(friend)">
-            <v-list-item-content>
-              <v-list-item-title>用户名:{{ friend.uname }}</v-list-item-title>
-              <v-list-item-title>用户ID: {{ friend.uid }}</v-list-item-title>
-            </v-list-item-content>
-            <v-btn small color="error" @click.stop="removeFriend(friend.uid)" style="font-size: 12px; padding: 4px 8px;">
-              删除好友
+  <v-data-table
+      :headers="headers"
+      :items="friends"
+      :search="search"
+  >
+    <!-- 表格顶部插槽 -->
+    <template #top>
+        <v-toolbar flat>
+            <v-toolbar-title>好友列表</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn icon @click="fetchFriends()">
+                <v-icon>mdi-refresh</v-icon>
             </v-btn>
-          </v-list-item>
-        </v-list>
-      </v-col>
-    </v-row>
-  </v-container>
-  <!-- 添加v-dialog -->
+            <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="搜索"
+                single-line
+                hide-details
+            ></v-text-field>
+        </v-toolbar>
+    </template>
+    <template v-slot:[`item.eye`]="{ item  }">
+        <v-btn icon @click="openUserCard(item)">
+                <v-icon>mdi-eye</v-icon>
+        </v-btn>
+    </template>
+    
+    <template v-slot:[`item.delete`]="{ item }">
+        <v-btn icon @click="removeFriend(item.uid)">
+            <v-icon color="red">mdi-trash-can</v-icon>
+        </v-btn>
+    </template>
+  </v-data-table>
   <v-dialog v-model="dialog" persistent max-width="500px">
-    <UserCard :uid="selectedUser.uid" :uname="selectedUser.uname" />
     <v-card-actions>
-      <v-btn color="red" text @click="dialog = false">Close</v-btn>
+      <v-btn @click="dialog = false">
+          <v-icon color="red">mdi-close</v-icon>
+      </v-btn>
     </v-card-actions>
+    <UserCard :uid="selectedUser.uid" :uname="selectedUser.uname" />
   </v-dialog>
 </template>
 
@@ -32,14 +49,24 @@ import UserCard from '@/components/UserCard.vue';
 
 export default {
   name: 'FriendListPage',
+  mounted() {
+    this.fetchFriends();
+  },
   components: {
     UserCard
   },
   data() {
     return {
       friends: [],
+      search: '',
       selectedUser: {}, // 初始化selectedUser为一个空对象
       dialog: false,     // 初始化dialog为false，控制对话框的显示
+      headers: [
+        { title: '用户ID', value: 'uid', sortable: true },
+        { title: '用户名', value: 'uname', sortable: true },
+        { title: '用户名片', key: 'eye', sortable: false },
+        { title: '删除好友', key: 'delete', sortable: false },
+      ],
     };
   },
   methods: {

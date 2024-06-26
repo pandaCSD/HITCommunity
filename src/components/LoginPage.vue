@@ -1,9 +1,9 @@
 <template>
   <v-app>
-    <v-container fill-height fluid class="pa-0 ma-0">
-      <v-row justify="center">
+    <v-container fill-height fluid class="pa-0 ma-0 login-background">
+      <v-row class="fill-height" align="center" justify="center">
         <v-col cols="12" sm="8" md="4">
-          <v-card class="elevation-12">
+          <v-card class="elevation-12 login-card">
             <v-toolbar color="primary" dark flat>
               <v-toolbar-title>工大圈子</v-toolbar-title>
             </v-toolbar>
@@ -78,3 +78,16 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.login-background {
+  background-image: url('../assets/images/bg1.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.9);
+}
+</style>

@@ -3,13 +3,6 @@
     <v-container>
       <v-row>
         <v-col>
-          <v-btn color="primary" class="my-4" @click="createNewTopic">
-            新主题
-          </v-btn>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
           <v-data-table
             :headers="headers"
             :items="topics"
@@ -171,9 +164,6 @@ export default {
     };
   },
   methods: {
-    createNewTopic() {
-      this.$router.push("/posttopic");
-    },
     goToTopic(item) {
       this.$router.push({ name: 'PostDetail', params: { id: item.id } });
     },

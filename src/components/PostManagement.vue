@@ -67,14 +67,23 @@ export default {
             }));
         }
       } catch (error) {
-        console.error('getting posts error: ', error);
+        alert("网络错误");
       }
     },
     openPostDetail(item) {
       this.$router.push({name:'PostDetail',params:{id: item.pid}});
     },
-    deletePost(item) {
-      return item;
+    async deletePost(item) {
+      try {
+        const response = await this.$axios.delete('/admin/post/'+item.pid);
+        if (response.data.success) {
+          alert("删除成功");
+        } else {
+          alert("删除失败");
+        }
+      } catch (error) {
+        alert("网络错误");
+      }
     }
   },
 };

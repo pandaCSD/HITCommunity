@@ -9,56 +9,58 @@
         <img v-for="image in images" :src="image.data" :key="image.url" class="post-image" @click="openImageDialog(image.data)" />
       </div>
       <p class="post-meta">
-        Posted by: <strong>{{ postUname }}</strong>
-      </p>
-      <p class="post-meta">
-        Posted at: <time>{{ time }}</time>
+        <strong>{{ postUname }}</strong> 于 <time>{{ time }}</time> 发布
       </p>
     </div>
     
     <!-- 点赞按钮和点赞数展示 -->
-    <div class="like-section">
-      <v-btn color="primary" @click="likePost">点赞</v-btn>
-      <p>Likes: {{ likes }}</p>
-    </div>
+    <v-btn color="primary" icon @click="likePost">
+      <v-icon>mdi-thumb-up</v-icon>
+    </v-btn>
+
+    <v-btn color="primary" @click="commentDialog = true">
+      <v-icon>mdi-comment</v-icon>
+    </v-btn>
+
+    <v-btn color="primary" @click="sharePost">
+      <v-icon>mdi-share</v-icon>
+    </v-btn>
 
     <!-- 评论展示部分 -->
     <div class="comments-section">
-      <h2>评论:</h2>
       <table>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Comment</th>
-            <th>Comment Time</th>
-          </tr>
-        </thead>
         <tbody>
           <tr v-for="comment in comments" :key="comment.cid">
-            <td>{{ comment.uname }}</td>
-            <td>{{ comment.ccontent }}</td>
-            <td>{{ comment.ctime }}</td>
+            <td class="uname-column">{{ comment.uname }}</td>
+            <td class="ccontent-column">{{ comment.ccontent }}</td>
+            <td class="ctime-column">{{ comment.ctime }}</td>
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <!-- 添加评论表单 -->
-    <div class="add-comment-section">
-      <h3>发表评论:</h3>
-      <v-text-field
-        v-model="newComment"
-        label="Your comment"
-        outlined
-        dense
-        solo
-      ></v-text-field>
-      <v-btn color="success" @click="submitComment">添加评论</v-btn>
-    </div>
-    
+    </div>    
     <!-- 图片放大对话框 -->
     <v-dialog v-model="dialog" max-width="800px">
       <v-img :src="selectedImage" max-width="800px" max-height="800px" />
+    </v-dialog>
+
+    <v-dialog v-model="commentDialog" max-width="500px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">发表评论</span>
+        </v-card-title>
+        <v-card-text>
+          <v-textarea label="你的评论" v-model="newComment"></v-textarea>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="submitComment">
+            <v-icon left>mdi-send</v-icon>
+          </v-btn>
+          <v-btn color="red darken-1" text @click="commentDialog = false">
+            <v-icon left>mdi-close</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
   </div>
 </template>
@@ -77,6 +79,7 @@ export default {
       newComment: '',
       images: [],
       dialog: false,
+      commentDialog: false,
       selectedImage: '',
     };
   },
@@ -170,10 +173,10 @@ export default {
         if (response.data.success) {
           this.likes += 1; // 假设点赞成功后服务器没有返回更新后的点赞数
         } else {
-          console.log('您已经点赞过了！！');
+          console.log('您已经点赞过了');
         }
       } catch (error) {
-        alert('您已经点赞过了！！');
+        alert('您已经点赞过了');
       }
     },
     async submitComment() {
@@ -184,12 +187,12 @@ export default {
         });
         if (response.data.success) {
           this.newComment = ''; // 清空输入框
+          this.commentDialog = false;
         } else {
-          console.log('Error submitting comment');
+          alert('网络错误');
         }
       } catch (error) {
-        console.error('Error submitting comment:', error);
-        alert('Error submitting comment');
+        alert('网络错误');
       }
     },
     openImageDialog(imageUrl) {

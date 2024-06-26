@@ -1,43 +1,47 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="8">
-        <v-text-field
-          label="用户ID或用户名"
-          v-model="searchQuery"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="4">
-        <v-btn color="primary" @click="searchUser()">
-          搜索
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row v-if="searchResults.length">
-      <v-col cols="12">
-        <v-list>
-          <v-list-item v-for="user in searchResults" :key="user.uid" @click="openUserCard(user)">
-            <v-list-item-content>
-              <v-list-item-title>{{ user.uname }}</v-list-item-title>
-              <v-list-item-subtitle>UID: {{ user.uid }}</v-list-item-subtitle>
-            </v-list-item-content>
-            <v-btn color="primary" @click.stop="sendFriendRequest(user.uid)">
-              发送好友申请
+  <v-data-table
+      :headers="headers"
+      :items="searchResults"
+  >
+    <!-- 表格顶部插槽 -->
+    <template #top>
+        <v-toolbar flat>
+            <v-toolbar-title>好友搜索</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn icon @click="searchUser()">
+                <v-icon>mdi-magnify</v-icon>
             </v-btn>
-          </v-list-item>
-        </v-list>
-      </v-col>
-    </v-row>
-  </v-container>
-  <!-- 添加v-dialog -->
+            <v-text-field
+                v-model="searchQuery"
+                label="搜索"
+                single-line
+                hide-details
+            ></v-text-field>
+        </v-toolbar>
+    </template>
+    <template v-slot:[`item.eye`]="{ item  }">
+        <v-btn icon @click="openUserCard(item)">
+                <v-icon>mdi-eye</v-icon>
+        </v-btn>
+    </template>
+    <template v-slot:[`item.add`]="{ item }">
+        <v-btn icon @click="sendFriendRequest(item.uid)">
+          <v-icon>mdi-account-plus</v-icon>
+        </v-btn>
+    </template>
+  </v-data-table>
+
   <v-dialog v-model="dialog" persistent max-width="500px">
-    <UserCard :uid="selectedUser.uid" :uname="selectedUser.uname" />
     <v-card-actions>
-      <v-btn color="red" text @click="dialog = false">Close</v-btn>
+      <v-btn @click="dialog = false">
+          <v-icon color="red">mdi-close</v-icon>
+      </v-btn>
     </v-card-actions>
+    <UserCard :uid="selectedUser.uid" :uname="selectedUser.uname" />
   </v-dialog>
+
 </template>
-  
+
 <script>
 import UserCard from '@/components/UserCard.vue';
 
@@ -52,6 +56,12 @@ export default {
       searchQuery: '',
       selectedUser: {}, // 初始化selectedUser为一个空对象
       dialog: false,     // 初始化dialog为false，控制对话框的显示
+      headers: [
+        { title: '用户ID', value: 'uid', sortable: true },
+        { title: '用户名', value: 'uname', sortable: true },
+        { title: '用户名片', key: 'eye', sortable: false },
+        { title: '添加好友', key: 'add', sortable: false },
+      ],
     };
   },
   methods: {

@@ -1,30 +1,50 @@
 <template>
-  <v-container>
-    <v-row justify="center">
-      <v-col cols="12" sm="8" md="6">
-        <!-- <h1>好友请求</h1> -->
-        <v-btn color="primary" @click="fetchRequests">刷新请求列表</v-btn>
-        <v-list>
-          <v-list-item v-for="request in requests" :key="request.suid" @click="openUserCard(request)">
-            <v-list-item-content>
-              <v-list-item-title>用户ID: {{ request.uid }}</v-list-item-title>
-              <v-list-item-subtitle>用户名: {{ request.uname }}</v-list-item-subtitle>
-              <!-- <v-list-item-subtitle>请求时间: {{ request.requestTime }}</v-list-item-subtitle> -->
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-btn color="green" @click.stop="acceptRequest(request.uid)">接受</v-btn>
-              <v-btn color="red" @click.stop="rejectRequest(request.uid)">拒绝</v-btn>
-            </v-list-item-action>
-          </v-list-item>
-        </v-list>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-data-table
+      :headers="headers"
+      :items="requests"
+      :search="search"
+  >
+    <!-- 表格顶部插槽 -->
+    <template #top>
+        <v-toolbar flat>
+            <v-toolbar-title>好友申请</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn icon @click="fetchRequests()">
+                <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+            <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="搜索"
+                single-line
+                hide-details
+            ></v-text-field>
+        </v-toolbar>
+    </template>
+    <template v-slot:[`item.eye`]="{ item  }">
+        <v-btn icon @click="openUserCard(item)">
+                <v-icon>mdi-eye</v-icon>
+        </v-btn>
+    </template>
+    <template v-slot:[`item.accept`]="{ item }">
+        <v-btn icon @click="acceptRequest(item.uid)">
+            <v-icon color="green">mdi-check</v-icon>
+        </v-btn>
+    </template>
+    <template v-slot:[`item.reject`]="{ item }">
+        <v-btn icon @click="rejectRequest(item.uid)">
+            <v-icon color="red">mdi-close</v-icon>
+        </v-btn>
+    </template>
+  </v-data-table>
+
   <v-dialog v-model="dialog" persistent max-width="500px">
-    <UserCard :uid="selectedUser.uid" :uname="selectedUser.uname" />
     <v-card-actions>
-      <v-btn color="red" text @click="dialog = false">Close</v-btn>
+      <v-btn @click="dialog = false">
+          <v-icon color="red">mdi-close</v-icon>
+      </v-btn>
     </v-card-actions>
+    <UserCard :uid="selectedUser.uid" :uname="selectedUser.uname" />
   </v-dialog>
 </template>
 
@@ -38,9 +58,17 @@ export default {
   },
   data() {
     return {
+      search: '',
       requests: [],
       selectedUser: {}, // 初始化selectedUser为一个空对象
-      dialog: false,     // 初始化dialog为false，控制对话框的显示
+      dialog: false,    // 初始化dialog为false，控制对话框的显示
+      headers: [
+        { title: '用户ID', value: 'uid', sortable: true },
+        { title: '用户名', value: 'uname', sortable: true },
+        { title: '用户名片', key: 'eye', sortable: false },
+        { title: '接受申请', key: 'accept', sortable: false },
+        { title: '拒绝申请', key: 'reject', sortable: false },
+      ],
     };
   },
   mounted() {
