@@ -11,13 +11,13 @@
               <v-form @submit.prevent="submitForm">
                 <v-text-field
                   v-model="username"
-                  label="Username"
+                  label="用户名"
                   prepend-icon="mdi-account"
                   required
                 ></v-text-field>
                 <v-text-field
                   v-model="password"
-                  label="Password"
+                  label="密码"
                   prepend-icon="mdi-lock"
                   type="password"
                   required
@@ -60,7 +60,7 @@ export default {
       this.loading = true;
       try {
         const payload = this.isChecked ? { uid: -1, uname: "admin", upassword: this.password } : { uid: -1, uname: this.username, upassword: this.password };
-        const path = this.isChecked ? 'admin/login' : '/user/login';
+        const path = this.isChecked ? '/admin/login' : '/user/login';
         const response = await this.$axios.post(path, payload);
         if (response.data.success) {
           this.$router.push(this.isChecked ? '/admin-home' : '/home');

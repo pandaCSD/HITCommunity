@@ -1,119 +1,84 @@
 <template>
-    <v-app>
-      <v-container>
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-card>
-              <v-card-title>
-                用户列表
-                <v-spacer></v-spacer>
-                <v-text-field
-                  v-model="userSearch"
-                  append-icon="mdi-magnify"
-                  label="搜索"
-                  single-line
-                  hide-details
-                ></v-text-field>
-              </v-card-title>
-              <v-card-text>
-                <v-list>
-                  <v-list-item-group v-model="selectedUser">
-                    <v-list-item
-                      v-for="user in filteredUsers"
-                      :key="user.id"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title>{{ user.name }}</v-list-item-title>
-                      </v-list-item-content>
-                      <v-list-item-action>
-                        <v-btn icon @click="deleteUser(user.id)">
-                          <v-icon>mdi-delete</v-icon>
-                        </v-btn>
-                      </v-list-item-action>
-                    </v-list-item>
-                  </v-list-item-group>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </v-col>
-          
-          <v-col cols="12" md="6">
-            <v-card>
-              <v-card-title>
-                帖子列表
-                <v-spacer></v-spacer>
-                <v-text-field
-                  v-model="postSearch"
-                  append-icon="mdi-magnify"
-                  label="搜索"
-                  single-line
-                  hide-details
-                ></v-text-field>
-              </v-card-title>
-              <v-card-text>
-                <v-list>
-                  <v-list-item-group v-model="selectedPost">
-                    <v-list-item
-                      v-for="post in filteredPosts"
-                      :key="post.id"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title>{{ post.title }}</v-list-item-title>
-                      </v-list-item-content>
-                      <v-list-item-action>
-                        <v-btn icon @click="deletePost(post.id)">
-                          <v-icon>mdi-delete</v-icon>
-                        </v-btn>
-                      </v-list-item-action>
-                    </v-list-item>
-                  </v-list-item-group>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-app>
-  </template>
-  
-  <script>
-  export default {
-    data: () => ({
-      userSearch: '',
-      postSearch: '',
-      selectedUser: null,
-      selectedPost: null,
-      users: [
-        { id: 1, name: 'Alice' },
-        { id: 2, name: 'Bob' },
-        { id: 3, name: 'Charlie' }
+  <v-app>
+    <v-navigation-drawer v-model="drawer" app permanent>
+      <v-list>
+      <v-list-item-group>
+        <v-list-item 
+          v-for="item in menuItems" 
+          :key="item.title"
+          @click="handleClick(item)">
+          <v-list-item-content>
+            <v-list-item-title v-text="item.title"></v-list-item-title>
+          </v-list-item-content>
+
+          <v-list-item-action v-if="item.children">
+            <v-icon>mdi-chevron-down</v-icon>
+          </v-list-item-action>
+
+          <v-list-item-group v-if="item.children">
+            <v-list-item 
+              v-for="child in item.children" 
+              :key="child.title"
+              @click="currentComponent = child.component"
+              >
+              <v-list-item-content>
+                <v-list-item-title v-text="child.title"></v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list-item>
+      </v-list-item-group>
+    </v-list>
+    </v-navigation-drawer>
+    
+    <v-app-bar app>
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-toolbar-title>哈工大圈子</v-toolbar-title>
+    </v-app-bar>
+
+    <v-main>
+      <keep-alive>
+        <component :is="currentComponent"></component>
+      </keep-alive>
+    </v-main>
+  </v-app>
+</template>
+
+<script>
+import UserManagement from '@/components/UserManagement.vue';
+import PostManagement from '@/components/PostManagement.vue';
+
+export default {
+  name: 'AdminHomePage',
+  components: {
+    UserManagement,
+    PostManagement,
+  },
+  data() {
+    return {
+      drawer: true, // 默认保持抽屉打开
+      currentComponent: UserManagement, // 当前显示的组件
+      menuItems: [
+        // { title: '欢迎', component: 'WelcomePage'},
+        {
+          title: '用户管理',
+          component : 'UserManagement'
+        },
+        // 这里可以添加更多的菜单项
+        {
+          title: '帖子管理',
+          component: 'PostManagement'
+        }
       ],
-      posts: [
-        { id: 1, title: 'Post 1' },
-        { id: 2, title: 'Post 2' },
-        { id: 3, title: 'Post 3' }
-      ]
-    }),
-    computed: {
-      filteredUsers() {
-        return this.users.filter(user =>
-          user.name.toLowerCase().includes(this.userSearch.toLowerCase())
-        );
-      },
-      filteredPosts() {
-        return this.posts.filter(post =>
-          post.title.toLowerCase().includes(this.postSearch.toLowerCase())
-        );
-      }
-    },
-    methods: {
-      deleteUser(id) {
-        this.users = this.users.filter(user => user.id !== id);
-      },
-      deletePost(id) {
-        this.posts = this.posts.filter(post => post.id !== id);
+    }
+  },
+  methods: {
+    handleClick(item) {
+      // Change the component only if there are no children
+      if (!item.children) {
+        this.currentComponent = item.component;
       }
     }
   }
-  </script>
-  
+};
+</script>
