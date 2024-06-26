@@ -55,32 +55,71 @@
           </v-data-table>
         </v-col>
       </v-row>
+      <v-row>
+        <v-col>
+          <v-data-table
+            :headers="headers"
+            :items="topics"
+            class="elevation-1"
+            :search="search"
+            hide-default-footer
+          >
+            <!-- 表格顶部插槽 -->
+            <template #top>
+              <v-toolbar flat>
+                <v-toolbar-title>好友转发</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-text-field
+                  v-model="search"
+                  append-icon="mdi-magnify"
+                  label="搜索"
+                  single-line
+                  hide-details
+                 
+                ></v-text-field>
+              </v-toolbar>
+            </template>
+
+            <template v-slot:item="{ item }">
+              <div class="item-container">
+                <v-btn icon @click="goToTopic(item)">
+                  <v-icon>mdi-eye</v-icon>
+                </v-btn>
+                <div class="item-content">
+                  <div class="item-field repost-field">
+                    <span class="item-topic">{{ item.rname }}</span>
+                  </div>
+                  <div class="item-field topic-field">
+                    <span class="item-topic">{{ item.topic }}</span>
+                  </div>
+                  <div class="item-field">
+                    <span class="item-replies">评论数：{{ item.replies }}</span>
+                  </div>
+                  <div class="item-field">
+                    <span class="item-views">热度：{{ item.views }}</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </v-data-table>
+        </v-col>
+      </v-row>
     </v-container>
   </v-app>
 </template>
-
 <script>
-// import axios from 'axios';
 export default {
   async mounted(){
     try {
       const response = await this.$axios.get('/post/my_posts');
-      
-      // 确认请求成功，并打印完整的响应数据
-      console.log('get posts successful:', response.data);
-      
-      // 检查响应数据的格式
       if (response.data.success) {
-        console.log('Posts data:', response.data.data);
-        // 这里可以将 posts 数据保存到组件的状态中
         this.posts = response.data.data;
-        // 将posts的数据存入topics中
         this.posts.forEach(post => {
           this.topics.push({
             topic: post.title,
             replies: post.replies || 0,
             views: post.views || 0,
-            activity:post.ptime,
+            activity: post.ptime,
             id: post.pid,
             owner: post.owner,
             content: post.text,
@@ -91,14 +130,25 @@ export default {
       }
 
       const repost_response = await this.$axios.get('/post/reposts');
-      // 确认请求成功，并打印完整的响应数据
-      console.log('get posts successful:', repost_response.data);
-       // 检查响应数据的格式
-       if (repost_response.data.success) {
-          // 将返回的<Name ， Post >对，注册到repost_topics中，在html中动态展示。
-       }else{
-          console.error('Unexpected response format:', repost_response.data);
-       }
+      if (repost_response.data.success) {
+        this.reposts = repost_response.data.data;
+        this.reposts.forEach(repost => {
+          let name = repost.name;
+          let post = repost.post;
+          this.repost_topics.push({
+            rname: name,
+            topic: post.title,
+            replies: post.replies || 0,
+            views: post.views || 0,
+            activity: post.ptime,
+            id: post.pid,
+            owner: post.owner,
+            content: post.text,
+          });
+        });
+      } else {
+        console.error('Unexpected response format:', repost_response.data);
+      }
 
     } catch (error) {
       console.error('getting posts error: ', error);
@@ -107,23 +157,28 @@ export default {
   data() {
     return {
       search: '',
-      headers: [
+      repostSearch: '',
+      headers: [],
+      repostHeaders: [
+        { text: '转发者', value: 'rname' },
+        { text: '主题', value: 'topic' },
+        { text: '活跃时间', value: 'activity' },
+        { text: '评论数', value: 'replies' },
+        { text: '热度', value: 'views' }
       ],
-      topics: [
-      ],
-      repost_topics: [
-      ],
+      topics: [],
+      repost_topics: [],
     };
   },
   methods: {
     createNewTopic() {
-      // 创建新主题的逻辑
       this.$router.push("/posttopic");
     },
     goToTopic(item) {
-      // 导航到主题的逻辑
-      // alert(`导航到主题: ${item.topic}`);
-      this.$router.push({name:'PostDetail',params:{id: item.id}});
+      this.$router.push({ name: 'PostDetail', params: { id: item.id } });
+    },
+    goToRepostTopic(item) {
+      this.$router.push({ name: 'PostDetail', params: { id: item.id } });
     },
   },
 };
@@ -164,8 +219,13 @@ body {
 }
 
 .topic-field {
-  flex: 2; /* 增加第一个字段的宽度 */
-  padding-right: 20px; /* 增加第一个字段与其他字段之间的间隔 */
+  flex: 2;
+  padding-right: 20px;
+}
+
+.repost-field {
+  flex: 1;
+  padding-right: 20px;
 }
 
 .item-topic {
@@ -180,7 +240,6 @@ body {
   font-size: 0.9em;
 }
 
-/* 新增样式 */
 .v-toolbar {
   background-color: #fafafa;
   color: #424242;
