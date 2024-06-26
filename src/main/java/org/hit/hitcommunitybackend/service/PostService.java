@@ -21,4 +21,6 @@ public interface PostService {
     List<String> getImagesService(Integer pid);
     List<Repost> getRepostByUId(Integer uid);
     boolean adDeletePostService(Integer pid);
+
+    List<Post> adminGetAllPost();
 }

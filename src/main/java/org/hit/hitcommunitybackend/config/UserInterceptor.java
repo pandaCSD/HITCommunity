@@ -3,6 +3,7 @@ package org.hit.hitcommunitybackend.config;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.hit.hitcommunitybackend.controller.AdminController;
 import org.hit.hitcommunitybackend.controller.UserController;
 import org.hit.hitcommunitybackend.domain.User;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -23,10 +24,9 @@ public class UserInterceptor implements HandlerInterceptor {
         // 从session中取出用户信息
         HttpSession session = request.getSession();
         User sessionUser = (User) session.getAttribute(UserController.SESSION_NAME);
-
+        User sessionAdmin = (User) session.getAttribute(AdminController.SESSION_NAME);
         // 若session中没有用户信息这说明用户未登录
-        if (sessionUser == null) {
-            response.sendRedirect("/");
+        if (sessionUser == null && sessionAdmin == null) {
             return false;
         } else {
             return true;

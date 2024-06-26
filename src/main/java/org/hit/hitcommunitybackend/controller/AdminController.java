@@ -9,7 +9,6 @@ import org.hit.hitcommunitybackend.model.Result;
 import org.hit.hitcommunitybackend.service.PostService;
 import org.hit.hitcommunitybackend.service.UserService;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -29,8 +28,9 @@ public class AdminController {
     @PostMapping("/login")
     public Result<Void> login(@RequestBody User user, HttpServletRequest request) {
         Result<Void> result = new Result<>();
-        if(Objects.equals(user.getUname(), "admin") && Objects.equals(user.getUpassword(), "123456")) {
+        if (Objects.equals(user.getUname(), "admin") && Objects.equals(user.getUpassword(), "123456")) {
             User x = new User();
+            x.setUid(-1);
             x.setUname("admin");
             request.getSession().setAttribute(SESSION_NAME, x);
             result.setResultSuccess("登录成功");
@@ -59,10 +59,33 @@ public class AdminController {
     }
 
     @GetMapping("/all-user")
-    public Result<List<User>> allUser(HttpServletRequest request) {
+    public Result<List<User>> allUser() {
         Result<List<User>> result = new Result<>();
         List<User> users = userService.getAllUserService();
         result.setResultSuccess("获取所有用户成功", users);
+        return result;
+    }
+
+    @GetMapping("/all-post")
+    public Result<List<Post>> allPost() {
+        Result<List<Post>> result = new Result<>();
+        List<Post> posts = postService.adminGetAllPost();
+        for(Post post : posts) {
+            post.getPowner().setUpassword("");
+        }
+        result.setResultSuccess("获取所有帖子成功", posts);
+        return result;
+    }
+
+    @PutMapping("/update/password")
+    public Result<Void> updatePassword(@RequestParam Integer uid, @RequestParam String password) {
+        Result<Void> result = new Result<>();
+        User u1 = userService.userUpdateUpasswordService(uid, password);
+        if(u1 == null) {
+            result.setResultFailed("更新用户密码失败");
+        } else {
+            result.setResultSuccess("更新用户密码成功");
+        }
         return result;
     }
 
