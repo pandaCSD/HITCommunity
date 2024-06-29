@@ -1,174 +1,70 @@
 <template>
-  <v-app>
-    <v-container>
-      <v-row>
-        <v-col>
-          <v-data-table
-            :headers="headers"
-            :items="topics"
-            class="elevation-1"
-            :search="search"
-          >
-            <!-- 表格顶部插槽 -->
-            <template #top>
-              <v-toolbar flat>
-                <v-toolbar-title>最新</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-text-field
-                  v-model="search"
-                  append-icon="mdi-magnify"
-                  label="搜索"
-                  single-line
-                  hide-details
-                ></v-text-field>
-              </v-toolbar>
-            </template>
-
-            <template v-slot:item="{ item }">
-              <div class="item-container">
-                <v-btn icon @click="goToTopic(item)">
-                  <v-icon>mdi-eye</v-icon>
-                </v-btn>
-                <div class="item-content">
-                  <div class="item-field topic-field">
-                    <span class="item-topic">{{ item.topic }}</span>
-                  </div>
-                  <div class="item-field">
-                    <span class="item-activity">活跃时间：{{ item.activity }}</span>
-                  </div>
-                  <div class="item-field">
-                    <span class="item-replies">评论数：{{ item.replies }}</span>
-                  </div>
-                  <div class="item-field">
-                    <span class="item-views">热度：{{ item.views }}</span>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </v-data-table>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-data-table
-            :headers="headers"
-            :items="topics"
-            class="elevation-1"
-            :search="search"
-            hide-default-footer
-          >
-            <!-- 表格顶部插槽 -->
-            <template #top>
-              <v-toolbar flat>
-                <v-toolbar-title>好友转发</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-text-field
-                  v-model="search"
-                  append-icon="mdi-magnify"
-                  label="搜索"
-                  single-line
-                  hide-details
-                 
-                ></v-text-field>
-              </v-toolbar>
-            </template>
-
-            <template v-slot:item="{ item }">
-              <div class="item-container">
-                <v-btn icon @click="goToTopic(item)">
-                  <v-icon>mdi-eye</v-icon>
-                </v-btn>
-                <div class="item-content">
-                  <div class="item-field repost-field">
-                    <span class="item-topic">{{ item.rname }}</span>
-                  </div>
-                  <div class="item-field topic-field">
-                    <span class="item-topic">{{ item.topic }}</span>
-                  </div>
-                  <div class="item-field">
-                    <span class="item-replies">评论数：{{ item.replies }}</span>
-                  </div>
-                  <div class="item-field">
-                    <span class="item-views">热度：{{ item.views }}</span>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </v-data-table>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-app>
+  <v-data-table
+    :headers="headers"
+    :items="posts"
+    :search="search"
+  >
+    <!-- 表格顶部插槽 -->
+    <template #top>
+        <v-toolbar flat>
+          <v-toolbar-title>我的圈子</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="refresh()">
+            <v-icon>mdi-refresh</v-icon>
+          </v-btn>
+          <v-text-field
+            v-model="search"
+            append-icon="mdi-magnify"
+            label="搜索"
+            single-line
+            hide-details
+          ></v-text-field>
+        </v-toolbar>
+    </template>
+    <template v-slot:[`item.eye`]="{ item  }">
+        <v-btn icon @click="openPostDetail(item)">
+          <v-icon>mdi-eye</v-icon>
+        </v-btn>
+    </template>
+  </v-data-table>
 </template>
+
 <script>
 export default {
   async mounted(){
-    try {
-      const response = await this.$axios.get('/post/my_posts');
-      if (response.data.success) {
-        this.posts = response.data.data;
-        this.posts.forEach(post => {
-          this.topics.push({
-            topic: post.title,
-            replies: post.replies || 0,
-            views: post.views || 0,
-            activity: post.ptime,
-            id: post.pid,
-            owner: post.owner,
-            content: post.text,
-          });
-        });
-      } else {
-        console.error('Unexpected response format:', response.data);
-      }
-
-      const repost_response = await this.$axios.get('/post/reposts');
-      if (repost_response.data.success) {
-        this.reposts = repost_response.data.data;
-        this.reposts.forEach(repost => {
-          let name = repost.name;
-          let post = repost.post;
-          this.repost_topics.push({
-            rname: name,
-            topic: post.title,
-            replies: post.replies || 0,
-            views: post.views || 0,
-            activity: post.ptime,
-            id: post.pid,
-            owner: post.owner,
-            content: post.text,
-          });
-        });
-      } else {
-        console.error('Unexpected response format:', repost_response.data);
-      }
-
-    } catch (error) {
-      console.error('getting posts error: ', error);
-    }
+    this.refresh();
   },
   data() {
     return {
       search: '',
-      repostSearch: '',
-      headers: [],
-      repostHeaders: [
-        { text: '转发者', value: 'rname' },
-        { text: '主题', value: 'topic' },
-        { text: '活跃时间', value: 'activity' },
-        { text: '评论数', value: 'replies' },
-        { text: '热度', value: 'views' }
+      headers: [
+        { title: '帖子详情', key: 'eye', sortable: false },
+        { title: '帖子标题', value: 'title', sortable: false},
+        { title: '发布者', value: 'powner', sortable: true},
+        // { title: '帖子ID', value: 'pid', sortable: true },
+        { title: '时间', value: 'ptime', sortable: true },
       ],
-      topics: [],
-      repost_topics: [],
+      posts: [],
     };
   },
   methods: {
-    goToTopic(item) {
-      this.$router.push({ name: 'PostDetail', params: { id: item.id } });
+    openPostDetail(item) {
+      this.$router.push({name:'PostDetail',params:{id: item.pid}});
     },
-    goToRepostTopic(item) {
-      this.$router.push({ name: 'PostDetail', params: { id: item.id } });
+    async refresh(){
+      try {
+        const response = await this.$axios.get('/post/mycircle');
+        if (response.data.success) {
+          this.posts = response.data.data.map(post => ({
+              pid: post.pid,
+              ptime: post.ptime,
+              powner: post.powner.uname,
+              title: post.title,
+            }));
+        }
+      } catch (error) {
+        alert("网络错误");
+      }
     },
   },
 };

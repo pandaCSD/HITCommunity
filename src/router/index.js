@@ -4,6 +4,7 @@ import Home from '../components/HomePage.vue';
 import PostPage from '@/components/PostPage.vue';
 import PostDetail from '@/components/PostDetail.vue';
 import AdminHome from '@/components/AdminHomePage.vue'
+import UserPosts from '@/components/UserPosts.vue'
 
 const routes = [
     {
@@ -31,6 +32,11 @@ const routes = [
         name: 'PostDetail',
         component: PostDetail,
     },
+    {
+        path: '/post/:uid/:uname', 
+        name: 'UserPosts',
+        component: UserPosts,
+    }
 ];
 
 const router = createRouter({

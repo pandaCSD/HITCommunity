@@ -57,7 +57,7 @@ export default {
           alert('注册失败');
         }
       } catch (error) {
-        alert('网络错误');
+        alert('注册失败');
       }
     },
     close() {

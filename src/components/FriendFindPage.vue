@@ -102,6 +102,7 @@ export default {
         const response = await this.$axios.post(`/user/friend-requests/send/`+uid);
         if (response.data.success) {
           this.searchResults = this.searchResults.filter(f => f.uid !== uid);
+          alert('发送成功');
         } else {
           alert('发送好友申请失败');
         }

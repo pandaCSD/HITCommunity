@@ -26,6 +26,12 @@
                 <v-icon>mdi-eye</v-icon>
         </v-btn>
     </template>
+
+    <template v-slot:[`item.posts`]="{ item  }">
+        <v-btn icon @click="goToUserPosts(item)">
+                <v-icon>mdi-forum</v-icon>
+        </v-btn>
+    </template>
     
     <template v-slot:[`item.delete`]="{ item }">
         <v-btn icon @click="removeFriend(item.uid)">
@@ -33,6 +39,7 @@
         </v-btn>
     </template>
   </v-data-table>
+
   <v-dialog v-model="dialog" persistent max-width="500px">
     <v-card-actions>
       <v-btn @click="dialog = false">
@@ -65,6 +72,7 @@ export default {
         { title: '用户ID', value: 'uid', sortable: true },
         { title: '用户名', value: 'uname', sortable: true },
         { title: '用户名片', key: 'eye', sortable: false },
+        { title: '用户帖子', key: 'posts', sortable: false},
         { title: '删除好友', key: 'delete', sortable: false },
       ],
     };
@@ -101,6 +109,15 @@ export default {
         console.error('Error deleting friend:', error);
         alert('An error occurred while deleting friend. Please try again later.');
       }
+    },
+    goToUserPosts(user){
+      this.$router.push({
+        name: 'UserPosts',
+        params: {
+          uid: user.uid,
+          uname: user.uname
+        }
+      });
     },
   },
 };

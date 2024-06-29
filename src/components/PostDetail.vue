@@ -22,9 +22,11 @@
       <v-icon>mdi-comment</v-icon>
     </v-btn>
 
-    <v-btn color="primary" @click="sharePost">
+    <v-btn color="primary" @click="sharePost()">
       <v-icon>mdi-share</v-icon>
     </v-btn>
+
+    <p>{{this.likes}}人赞了</p>
 
     <!-- 评论展示部分 -->
     <div class="comments-section">
@@ -86,7 +88,7 @@ export default {
   async mounted() {
     try {
       const postId = this.$route.params.id;
-      const response = await this.$axios.get(`/post/posts/${postId}`);
+      const response = await this.$axios.get(`/post/post/${postId}`);
       if (response.data.success) {
         this.postUname = response.data.data.powner.uname;
         this.text = response.data.data.text;
@@ -190,6 +192,19 @@ export default {
           this.commentDialog = false;
         } else {
           alert('网络错误');
+        }
+      } catch (error) {
+        alert('网络错误');
+      }
+    },
+    async sharePost() {
+      try {
+        const postId = this.$route.params.id;
+        const response = await this.$axios.post('/post/repost/'+postId);
+        if (!response.data.success) {
+          alert('网络错误');
+        } else {
+          alert('转发成功');
         }
       } catch (error) {
         alert('网络错误');

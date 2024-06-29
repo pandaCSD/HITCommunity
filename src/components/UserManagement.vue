@@ -148,8 +148,9 @@ export default {
         async resetPassword() {
             try {
                 const response = await this.$axios.put('/admin/update/password', {
-                    uid: this.changePasswordUser,
-                    password: this.newPassword
+                    uid: this.changePasswordUser.uid,
+                    uname: "",
+                    upassword: this.newPassword
                 });
                 if (response.data.success) {
                     this.dialogChangePassword = false;

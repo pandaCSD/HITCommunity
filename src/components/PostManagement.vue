@@ -45,12 +45,12 @@ export default {
       search: '',
       posts: [],
       headers: [
-          { title: '帖子ID', value: 'pid', sortable: true },
-          { title: '时间', value: 'ptime', sortable: true },
-          { title: '发布者ID', value: 'powner', sortable: true},
-          { title: '帖子标题', value: 'title', sortable: false},
-          { title: '帖子详情', key: 'eye', sortable: false },
-          { title: '删除帖子', key: 'delete', sortable: false },
+        { title: '帖子ID', value: 'pid', sortable: true },
+        { title: '时间', value: 'ptime', sortable: true },
+        { title: '发布者ID', value: 'powner', sortable: true},
+        { title: '帖子标题', value: 'title', sortable: false},
+        { title: '帖子详情', key: 'eye', sortable: false },
+        { title: '删除帖子', key: 'delete', sortable: false },
       ],
     };
   },

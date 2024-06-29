@@ -97,6 +97,8 @@ export default {
         const response = await this.$axios.post('/user/friend-requests/accept/'+suid);
         if (!response.data.success) {
           alert("网络错误");
+        } else {
+          alert("接受成功");
         }
       } catch (error) {
         alert("网络错误");
@@ -108,6 +110,8 @@ export default {
         const response = await this.$axios.post('/user/friend-requests/reject/'+suid);
         if (!response.data.success) {
           alert("网络错误");
+        } else {
+          alert("拒绝成功");
         }
       } catch (error) {
         alert("网络错误");

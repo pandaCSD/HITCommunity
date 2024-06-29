@@ -50,9 +50,9 @@ import WelcomePage from '@/components/WelcomePage.vue';
 import FriendListPage from '@/components/FriendListPage.vue'
 import FriendRequestPage from '@/components/FriendRequestPage.vue'
 import FriendFindPage from '@/components/FriendFindPage.vue'
-import PostPage from '@/components/PostPage.vue'
 import PostsPage from '@/components/PostsPage.vue'
 import UserProfile from '@/components/UserProfile.vue';
+import MyPostsPage from '@/components/MyPostsPage.vue';
 
 export default {
   name: 'MainPage',
@@ -62,9 +62,9 @@ export default {
     FriendListPage,
     FriendRequestPage,
     FriendFindPage,
-    PostPage,
     PostsPage,
     UserProfile,
+    MyPostsPage,
   },
   data() {
     return {
@@ -94,8 +94,8 @@ export default {
           title: '圈子',
           icon: 'mdi-folder',
           children: [
-            { title: '发布', component: 'PostPage' },
-            { title: '话题', component: 'PostsPage'},
+            { title: '我的帖子', component: 'MyPostsPage'},
+            { title: '我的圈子', component: 'PostsPage'},
           ]
         },
       ],
