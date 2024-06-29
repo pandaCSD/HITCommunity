@@ -91,7 +91,8 @@ public class UserServiceImpl implements UserService {
         requestDao.deleteRequestByUserID(uid);
         friendDao.deleteFriendByUserID(uid);
         repostDao.deleteByUserId(uid);
-        userDao.deleteById(uid);
+        userInfoDao.deleteById(uid);
+        userDao.deleteByUid(uid);
     }
 
     @Override

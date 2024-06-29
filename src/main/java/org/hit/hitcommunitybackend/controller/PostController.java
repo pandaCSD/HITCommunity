@@ -54,22 +54,38 @@ public class PostController {
     }
 
     // 这需要传入一个pid删除帖子
-    @PostMapping("/delete/{pid}")
-    public Result<Post> deletePost(@PathVariable Integer pid) {
-        Post post = postService.postDeleteService(pid);
-        Result<Post> result = new Result<>();
-
-        // 删除失败返回null
-        if (post == null) {
-            result.setResultFailedWithErrorCode("delete Post err, Post"+pid,ErrPostIdNotFound);
-        }else{
-            result.setResultSuccess("Post deleted successfully");
-            result.setData(post);
+    @DeleteMapping("/post/{pid}")
+    public Result<Void> deletePost(HttpServletRequest request, @PathVariable Integer pid) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        Optional<Post> p = postService.getPostById(pid);
+        Result<Void> result = new Result<>();
+        if (p.isPresent()) {
+            Post post = p.get();
+            if (Objects.equals(post.getPowner().getUid(), uid)) {
+                postService.userDeletePostService(pid);
+                result.setResultSuccess("帖子删除成功");
+            } else {
+                result.setResultFailed("不是帖子拥有者");
+            }
+        }
+        else {
+            result.setResultFailed("帖子不存在");
         }
         return result;
     }
 
-    @GetMapping("/posts/{pid}")
+    @DeleteMapping("/repost/{rid}")
+    public Result<Void> deleteRepost(HttpServletRequest request, @PathVariable Integer rid) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        postService.userDeleteRepostService(rid);
+        Result<Void> result = new Result<>();
+        result.setResultSuccess("撤销转发成功");
+        return result;
+    }
+
+    @GetMapping("/post/{pid}")
     public Result<Post> getPost(@PathVariable Integer pid) {
         Optional<Post> opost = postService.getPostById(pid);
         Result<Post> result = new Result<>();
@@ -133,18 +149,26 @@ public class PostController {
     }
 
     // 根据uid获取所有post
-    @GetMapping("/posts")
-    public Result<List<Post>> getPosts(HttpServletRequest request) {
+    @GetMapping("/posts/{uid}")
+    public Result<List<Post>> getPosts(HttpServletRequest request, @PathVariable Integer uid) {
         User user = (User) request.getSession().getAttribute(SESSION_NAME);
-        Integer uid = user.getUid();
-
+        Integer su = user.getUid();
         List<Post> res = postService.getAllPost(uid);
         Result<List<Post>> result = new Result<>();
-        result.setResultSuccess("All posts who's uid is satisfied found Here!!");
-        result.setData(res);
+        result.setResultSuccess("获取帖子成功", res);
         return result;
     }
-    
+
+    @GetMapping("/myreposts")
+    public Result<List<Repost>> getMyRePosts(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        List<Repost> r = postService.getRepostByUId(uid);
+        Result<List<Repost>> result = new Result<>();
+        result.setResultSuccess("获取转发成功", r);
+        return result;
+    }
+
     // 获取所有post
     @GetMapping("/allposts")
     public Result<List<Post>> getallPosts(HttpServletRequest request) {
@@ -178,7 +202,17 @@ public class PostController {
         result.setData(res);
         return result;
     }
-    
+
+    @GetMapping("/myposts")
+    public Result<List<Post>> getMyUserPosts(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        List<Post> res = postService.getAllPost(uid);
+        Result<List<Post>> result = new Result<>();
+        result.setResultSuccess("获取帖子成功", res);
+        return result;
+    }
+
     public class RepostRes {
         private String name;
         private Post post;
@@ -301,5 +335,15 @@ public class PostController {
             // 内部服务器错误，可以记录错误详情
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @GetMapping("/mycircle")
+    public  Result<List<Post>> getMyCircles(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(SESSION_NAME);
+        Integer uid = user.getUid();
+        Result<List<Post>> result = new Result<>();
+        List<Post> posts = postService.userGetCircleService(uid);
+        result.setResultSuccess("获取圈子成功", posts);
+        return result;
     }
 }

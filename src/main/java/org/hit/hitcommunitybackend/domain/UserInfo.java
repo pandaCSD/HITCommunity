@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 @Table(name = "userinfo")
 public class UserInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer uid;
 
     @Enumerated(EnumType.STRING)

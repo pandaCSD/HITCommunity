@@ -83,9 +83,9 @@ public class AdminController {
     }
 
     @PutMapping("/update/password")
-    public Result<Void> updatePassword(@RequestParam Integer uid, @RequestParam String password) {
+    public Result<Void> updatePassword(@RequestBody User user) {
         Result<Void> result = new Result<>();
-        User u1 = userService.userUpdateUpasswordService(uid, password);
+        User u1 = userService.userUpdateUpasswordService(user.getUid(), user.getUpassword());
         if(u1 == null) {
             result.setResultFailed("更新用户密码失败");
         } else {

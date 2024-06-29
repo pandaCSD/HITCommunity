@@ -6,11 +6,10 @@ import org.hit.hitcommunitybackend.domain.Repost;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface PostService {
     Post postPublishService(Integer uid, Post post); //上传帖子
-    Post postDeleteService(Integer pid, Integer uid); //删除帖子
-    Post postDeleteService(Integer pid);
     Integer postLikeService(Integer uid, Integer pid); //喜欢帖子
     Integer postCommentService(Integer uid, Integer pid, Comment comment); //评论帖子
     Repost repostService(Integer uid, Integer pid); //转发帖子
@@ -20,6 +19,10 @@ public interface PostService {
     boolean uploadImageService(Integer pid, String url);
     List<String> getImagesService(Integer pid);
     List<Repost> getRepostByUId(Integer uid);
+
+    void userDeleteRepostService(Integer rid);
+    void userDeletePostService(Integer pid);
+    List<Post> userGetCircleService(Integer uid);
 
     void adminDeletePostService(Integer pid);
     List<Post> adminGetAllPost();

@@ -1,5 +1,6 @@
 package org.hit.hitcommunitybackend.repository;
 
+import jakarta.transaction.Transactional;
 import org.hit.hitcommunitybackend.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,4 +10,7 @@ public interface UserDao extends JpaRepository<User, Integer> {
     User findByUname(String uname);
     User findByUnameAndUpassword(String uname, String upassword);
     User findByUid(Integer uid);
+
+    @Transactional
+    void deleteByUid(Integer uid);
 }

@@ -14,6 +14,8 @@ public interface PostDao extends JpaRepository<Post, Integer> {
     Optional<Post> findById(Integer id);
     // 查找所有Post
     List<Post> findAll();
+    List<Post> findByPid(Integer pid);
+    List<Post> findByPowner_Uid(Integer uid);
     // 根据ID删除Post
     void deleteById(Integer id);
 }

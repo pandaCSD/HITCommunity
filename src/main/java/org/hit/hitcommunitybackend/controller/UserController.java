@@ -266,10 +266,11 @@ public class UserController {
         }
     }
 
-    private UserInfo completeUserInfo(UserInfo info) {
+    private UserInfo completeUserInfo(UserInfo info, Integer uid) {
         if(info == null) {
             info = new UserInfo();
         }
+        info.setUid(uid);
         if(info.getAge() == null) {
             info.setAge(0);
         }
@@ -292,7 +293,7 @@ public class UserController {
     public Result<UserInfo> getUserInfo(@PathVariable Integer uid) {
         Result<UserInfo> result = new Result<>();
         UserInfo info = userService.userGetInfoService(uid);
-        info = completeUserInfo(info);
+        info = completeUserInfo(info, uid);
         result.setResultSuccess("获取用户信息成功", info);
         return result;
     }

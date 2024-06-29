@@ -8,9 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +23,9 @@ public class PostServiceImpl implements PostService {
     @Resource
     private LikeDao likeDao;
     @Resource
+    private FriendDao friendDao;
+
+    @Resource
     private CommentDao commentDao;
     @Autowired
     private RepostDao repostDao;
@@ -35,46 +37,6 @@ public class PostServiceImpl implements PostService {
         Optional<User> u = userDao.findById(uid);
         post.setPowner(u.orElse(null));
         return postDao.save(post);
-    }
-
-    @Override
-    public Post postDeleteService(Integer pid, Integer uid) {
-        Optional<Post> post = postDao.findById(uid);
-        Optional<User> user = userDao.findById(uid);
-
-        if (post.isPresent() && user.isPresent()) {
-
-            Post postToDelete = post.get();
-            User userToDelete = user.get();
-            // Post的所有人不是当前传入的User
-            if (postToDelete.getPowner().getUid() != userToDelete.getUid()){
-                log.error("Post not owned by this user");
-                return null;
-            }
-            postDao.delete(postToDelete);
-            return postToDelete;
-        }else if (post.isPresent()) {
-            log.error("User not found in postDeleteService");
-            return null;
-        }else if (user.isPresent()) {
-            log.error("Post not found in postDeleteService");
-            return null;
-        }
-
-        return null;
-    }
-
-    @Override
-    public Post postDeleteService(Integer pid) {
-        Optional<Post> post = postDao.findById(pid);
-        if (post.isPresent()) {
-            postDao.deleteById(pid);
-            log.info("Post num:{} deleted", pid);
-        }else{
-            log.error("Post not found");
-            return null;
-        }
-        return post.get();
     }
 
     @Override
@@ -151,6 +113,7 @@ public class PostServiceImpl implements PostService {
         List<Post> posts =  postDao.findAll();
         List<Post> needs = new ArrayList<>();
         for (Post post : posts) {
+            post.getPowner().setUpassword("");
             if(post.getPowner().getUid()==uid){
                 needs.add(post);
             }
@@ -162,6 +125,7 @@ public class PostServiceImpl implements PostService {
     public Optional<Post> getPostById(Integer pid) {
         Optional<Post> res = postDao.findById(pid);
         if (res.isPresent()) {
+            res.get().getPowner().setUpassword("");
             return res;
         }else{
             log.error("Post not found in  getPostById()");
@@ -171,7 +135,11 @@ public class PostServiceImpl implements PostService {
     
     @Override
     public List<Post> getAllofPost(){
-      return postDao.findAll();
+        List<Post> posts =  postDao.findAll();
+        for (Post post : posts) {
+            post.getPowner().setUpassword("");
+        }
+        return posts;
     }
 
     @Override
@@ -214,7 +182,42 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public void userDeletePostService(Integer pid) {
+        commentDao.deleteCommentsByPostId(pid);
+        likeDao.deleteByPostId(pid);
+        repostDao.deleteByPostId(pid);
+        imageDao.deleteByPostId(pid);
+        postDao.deleteById(pid);
+    }
+
+    @Override
     public List<Post> adminGetAllPost() {
         return postDao.findAll();
+    }
+
+    @Override
+    public void userDeleteRepostService(Integer rid) {
+        repostDao.deleteById(rid);
+    }
+
+    @Override
+    public List<Post> userGetCircleService(Integer uid) {
+        Set<Post> posts = new HashSet<>();
+        List<User> friends = friendDao.findAllFriend(uid);
+        for (User f : friends) {
+            List<Post> fps = postDao.findByPid(f.getUid());
+            List<Repost> frps = repostDao.findAllByRowner_Uid(f.getUid());
+            posts.addAll(fps);
+            for(Repost r : frps) {
+                posts.add(r.getOriginalPost());
+            }
+        }
+        List<Post> mps = postDao.findByPowner_Uid(uid);
+        posts.addAll(mps);
+        List<Post> l = new ArrayList<>(posts);
+        for(Post p : l) {
+            p.getPowner().setUpassword("");
+        }
+        return l;
     }
 }
